@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"shellcheck.customArgs": ["-x"],
+		"shellcheck.exclude": [2039]
+	},
+}
