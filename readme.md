@@ -68,9 +68,5 @@
 При необходимости внесения изменений в сам проект предложите Pull Request в основной
 репозиторий в ветку `develop`.
 
-## Лицензионное соглашение
-
-Полный текст лицензионного соглашения приведён в файле [LICENSE](LICENSE).
-
 [VSCode]: https://code.visualstudio.com/ "Visual Studio Code"
 [PowerShellCore]: https://github.com/PowerShell/PowerShell "PowerShell Core"
