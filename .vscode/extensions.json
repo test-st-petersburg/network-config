@@ -11,6 +11,7 @@
 		"DavidAnson.vscode-markdownlint",
 		"bierner.markdown-preview-github-styles",
 		"ms-vscode.PowerShell",
-		"timonwong.shellcheck"
+		"timonwong.shellcheck",
+		"bewhite.dokd-vscode-preview"
 	]
 }
