@@ -44,7 +44,7 @@
     # Модули, которые необходимо импортировать в глобальную среду перед импортированием данного модуля
     RequiredModules        = @(
         @{ModuleName = 'PSDesiredStateConfiguration'; ModuleVersion = '1.0'},
-        @{ModuleName = 'PackageManagement'; ModuleVersion = '1.3.1'} `
+        @{ModuleName = 'PackageManagement'; ModuleVersion = '1.3.1'}
     )
 
     # Сборки, которые должны быть загружены перед импортированием данного модуля
