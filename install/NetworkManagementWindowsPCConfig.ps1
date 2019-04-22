@@ -2,9 +2,9 @@
 #Requires -Modules PSDesiredStateConfiguration
 #Requires -Modules cChoco
 
-configuration NetworkManagementWindowsPCDSC
+configuration NetworkManagementWindowsPCConfig
 {
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+	Import-DscResource -ModuleName PSDesiredStateConfiguration
 	Import-DscResource -ModuleName cChoco
 
 	Environment chocolatelyInstall

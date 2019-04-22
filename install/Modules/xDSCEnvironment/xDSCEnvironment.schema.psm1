@@ -1,8 +1,4 @@
-#Requires -Version 5.0
-#Requires -Modules PSDesiredStateConfiguration
-#Requires -Modules @{ ModuleName = 'PackageManagement'; ModuleVersion = '1.1.7' }
-
-configuration PSForNetworkManagementWindowsPCDSC
+configuration DSCEnvironment
 {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 	Import-DscResource -ModuleName PackageManagement -ModuleVersion 1.3.1
