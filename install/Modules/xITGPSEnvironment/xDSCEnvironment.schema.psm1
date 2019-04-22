@@ -19,4 +19,12 @@ configuration DSCEnvironment
 		Source               = "PSGallery"
 		DependsOn            = "[PackageManagementSource]PSGallery"
 	}
+
+    Service WinRMService
+    {
+		Name                 = "WinRM"
+        Ensure = "Present"
+        StartupType = "Automatic"
+        State = "Running"
+    }
 }

@@ -13,13 +13,13 @@ Install-Module PackageManagement -RequiredVersion 1.3.1;
 
 $ModulesDir = (Join-Path -Path $PSScriptRoot -ChildPath 'Modules');
 
-Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xDSCEnvironment');
+Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xITGDSCEnvironment');
 
 $DSCConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'PSconfig');
 $ConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'config');
 
 #. (Join-Path -Path $PSScriptRoot -ChildPath 'DSCEnvironmentConfig.ps1');
-DSCEnvironment -InstanceName DSCEnvironment -OutputPath $DSCConfigDir;
+ITGDSCEnvironment -InstanceName ITGDSCEnvironment -OutputPath $DSCConfigDir;
 Start-DscConfiguration -Path $DSCConfigDir -Wait -Verbose -ErrorAction Stop;
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'NetworkManagementWindowsPCConfig.ps1');
