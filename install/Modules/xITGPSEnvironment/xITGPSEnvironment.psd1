@@ -1,13 +1,13 @@
 ﻿@{
 
     # Файл модуля скрипта или двоичного модуля, связанный с данным манифестом
-    RootModule             = 'xDSCEnvironment.schema.psm1'
+    RootModule             = 'xITGPSEnvironment.schema.psm1'
 
     # Номер версии данного модуля.
-    ModuleVersion          = '0.9.1'
+    ModuleVersion          = '0.9.0'
 
     # Уникальный идентификатор данного модуля
-    GUID                   = 'f69af116-2593-47a0-97eb-17c6feaad9b3'
+    GUID                   = '9c5c2a9e-ecc0-4cb7-b131-d45c9205f2e5'
 
     # Автор данного модуля
     Author                 = 'Sergey S. Betke'
@@ -20,7 +20,7 @@
 
     # Описание функций данного модуля
     Description            = @'
-    Конфигурация для установки необходимых модулей для PowerShell DSC.
+    Конфигурация необходимых модулей PowerShell и их источников для сети учреждения.
 '@
 
     # Минимальный номер версии обработчика Windows PowerShell, необходимой для работы данного модуля
@@ -78,6 +78,6 @@
     ModuleList             = @()
 
     # Список всех файлов, входящих в пакет данного модуля
-    FileList               = 'xDSCEnvironment.schema.psm1', 'xDSCEnvironment.psm1'
+    FileList               = 'xITGPSEnvironment.schema.psm1', 'xITGPSEnvironment.psm1'
 
 }
