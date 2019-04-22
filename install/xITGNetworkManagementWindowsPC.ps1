@@ -7,17 +7,24 @@ configuration ITGNetworkManagementWindowsPC
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName cChoco
 
-    Environment chocolatelyInstall {
-        Name  = 'chocolatelyInstall'
-        value = "${env:SystemDrive}\choco\bin"
-    }
-
     cChocoInstaller choco {
         InstallDir = "${env:SystemDrive}\choco"
     }
 
+    Environment chocolatelyInstall {
+        Name      = 'chocolatelyInstall'
+        value     = "${env:SystemDrive}\choco\bin"
+        DependsOn = @('[cChocoInstaller]choco')
+    }
+
     cChocoPackageInstaller VSCode {
-        Name = 'vscode'
-	}
+        Name      = 'vscode'
+        DependsOn = @('[cChocoInstaller]choco')
+    }
+
+    cChocoPackageInstaller git {
+        Name      = 'git.install'
+        DependsOn = @('[cChocoInstaller]choco')
+    }
 
 }
