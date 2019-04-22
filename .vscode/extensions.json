@@ -8,6 +8,7 @@
 		"EditorConfig.EditorConfig",
 		"sleistner.vscode-fileutils",
 		"Gruntfuggly.todo-tree",
+		"heaths.vscode-guid",
 		"DavidAnson.vscode-markdownlint",
 		"bierner.markdown-preview-github-styles",
 		"ms-vscode.PowerShell",
