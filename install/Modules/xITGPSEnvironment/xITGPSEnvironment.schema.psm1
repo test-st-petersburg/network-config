@@ -3,7 +3,6 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName PackageManagement -ModuleVersion 1.3.1
     Import-DscResource -ModuleName PowerShellModule -Name PSModuleResource
-    Import-DscResource -ModuleName xPowerShellExecutionPolicy -Name xPowerShellExecutionPolicy
 
     PackageManagementSource PSGallery {
         Ensure             = "Present"
@@ -26,10 +25,6 @@
     PSModuleResource xWinRM {
         Ensure      = "Present"
         Module_Name = "xWinRM"
-    }
-
-    xPowerShellExecutionPolicy PowerShellExecutionPolicy {
-        ExecutionPolicy = "Unrestricted"
     }
 
 }
