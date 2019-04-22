@@ -1,8 +1,9 @@
-configuration ITGPSEnvironment
+﻿configuration ITGPSEnvironment
 {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName PackageManagement -ModuleVersion 1.3.1
-    Import-DscResource -ModuleName xPowerShellExecutionPolicy
+    Import-DscResource -ModuleName PowerShellModule -Name PSModuleResource
+    Import-DscResource -ModuleName xPowerShellExecutionPolicy -Name xPowerShellExecutionPolicy
 
     PackageManagementSource PSGallery {
         Ensure             = "Present"
@@ -10,6 +11,21 @@ configuration ITGPSEnvironment
         ProviderName       = "PowerShellGet"
         SourceLocation     = "https://www.powershellgallery.com/api/v2/"
         InstallationPolicy = "Trusted"
+    }
+
+    PSModuleResource xPowerShellExecutionPolicy {
+        Ensure      = "Present"
+        Module_Name = "xPowerShellExecutionPolicy"
+    }
+
+    PSModuleResource cChoco {
+        Ensure      = "Present"
+        Module_Name = "cChoco"
+    }
+
+    PSModuleResource xWinRM {
+        Ensure      = "Present"
+        Module_Name = "xWinRM"
     }
 
     xPowerShellExecutionPolicy PowerShellExecutionPolicy {

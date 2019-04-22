@@ -10,20 +10,21 @@ $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted;
 Install-Module PackageManagement -RequiredVersion 1.3.1;
+Install-Module PowerShellModule;
 
 $ModulesDir = (Join-Path -Path $PSScriptRoot -ChildPath 'Modules');
 
-Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xITGPSEnvironment');
+Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xITGPSEnvironment') -Force;
 $PSConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'PSconfig');
-ITGPSEnvironment -InstanceName ITGPSEnvironment -OutputPath $PSConfigDir;
+ITGPSEnvironment -OutputPath $PSConfigDir;
 Start-DscConfiguration -Path $PSConfigDir -Wait -Verbose -ErrorAction Stop;
 
-Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xITGDSCEnvironment');
+Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xITGDSCEnvironment') -Force;
 $DSCConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'DSCconfig');
-ITGDSCEnvironment -InstanceName ITGDSCEnvironment -OutputPath $DSCConfigDir;
+ITGDSCEnvironment -OutputPath $DSCConfigDir;
 Start-DscConfiguration -Path $DSCConfigDir -Wait -Verbose -ErrorAction Stop;
 
-. (Join-Path -Path $PSScriptRoot -ChildPath 'NetworkManagementWindowsPCConfig.ps1');
+. (Join-Path -Path $PSScriptRoot -ChildPath 'xITGNetworkManagementWindowsPC.ps1');
 $ConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'config');
-NetworkManagementWindowsPCConfig -InstanceName NetworkManagementWindowsPCConfig -OutputPath $ConfigDir;
+ITGNetworkManagementWindowsPC -OutputPath $ConfigDir;
 Start-DscConfiguration -Path $ConfigDir -Wait -Verbose -ErrorAction Stop;

@@ -2,7 +2,16 @@ configuration ITGDSCEnvironment
 {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName PackageManagement -ModuleVersion 1.3.1
+    Import-DscResource -ModuleName xPowerShellExecutionPolicy
     Import-DscResource -ModuleName xWinRM
+
+    PackageManagementSource PSGallery {
+        Ensure             = "Present"
+        Name               = "PSGallery"
+        ProviderName       = "PowerShellGet"
+        SourceLocation     = "https://www.powershellgallery.com/api/v2/"
+        InstallationPolicy = "Trusted"
+    }
 
     PackageManagement cChoco {
         Ensure    = "Present"
@@ -21,7 +30,7 @@ configuration ITGDSCEnvironment
     xWinRM WinRM {
         Ensure                   = "Present"
         Protocol                 = "HTTP"
-        HTTPPort                 = "5985"
+    #    HTTPPort                 = "5985"
         Client_Basic             = "false"
         Client_Digest            = "false"
         Client_Kerberos          = "true"
@@ -29,4 +38,7 @@ configuration ITGDSCEnvironment
         Service_AllowUnencrypted = "false"
     }
 
+    xPowerShellExecutionPolicy PowerShellExecutionPolicy {
+        ExecutionPolicy = "Unrestricted"
+    }
 }
