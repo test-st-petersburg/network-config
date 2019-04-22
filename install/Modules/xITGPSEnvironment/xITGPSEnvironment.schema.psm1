@@ -4,13 +4,15 @@
     Import-DscResource -ModuleName PackageManagement -ModuleVersion 1.3.1
     Import-DscResource -ModuleName PowerShellModule -Name PSModuleResource
 
-    PackageManagementSource PSGallery {
+<#
+	PackageManagementSource PSGallery {
         Ensure             = "Present"
         Name               = "PSGallery"
         ProviderName       = "PowerShellGet"
         SourceLocation     = "https://www.powershellgallery.com/api/v2/"
         InstallationPolicy = "Trusted"
-    }
+	}
+#>
 
     PSModuleResource xPowerShellExecutionPolicy {
         Ensure      = "Present"
