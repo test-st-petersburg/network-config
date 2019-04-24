@@ -1,39 +1,39 @@
-# добавляем компоненты
+п»ї# РґРѕР±Р°РІР»СЏРµРј РєРѕРјРїРѕРЅРµРЅС‚С‹
 
 Install-WindowsFeature DSC-Service
-Install-WindowsFeature NPAS –IncludeManagementTools
+Install-WindowsFeature NPAS вЂ“IncludeManagementTools
 Install-WindowsFeature Routing -IncludeManagementTools
-Install-WindowsFeature RemoteAccess -IncludeAllSubFeature –IncludeManagementTools
-Install-WindowsFeature SNMP-Service –IncludeManagementTools
-Install-WindowsFeature DHCP –IncludeManagementTools
+Install-WindowsFeature RemoteAccess -IncludeAllSubFeature вЂ“IncludeManagementTools
+Install-WindowsFeature SNMP-Service вЂ“IncludeManagementTools
+Install-WindowsFeature DHCP вЂ“IncludeManagementTools
 
-# устанавливаем имена для интерфейсов
+# СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РёРјРµРЅР° РґР»СЏ РёРЅС‚РµСЂС„РµР№СЃРѕРІ
 
 Rename-NetAdapter -Name '' -NewName 'WAN'
 Rename-NetAdapter -Name '' -NewName 'LAN1'
 
-# удаляем ip адреса для возможности переконфигурирования роутера выполнением скрипта
+# СѓРґР°Р»СЏРµРј ip Р°РґСЂРµСЃР° РґР»СЏ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РїРµСЂРµРєРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°РЅРёСЏ СЂРѕСѓС‚РµСЂР° РІС‹РїРѕР»РЅРµРЅРёРµРј СЃРєСЂРёРїС‚Р°
 
 Remove-NetIpAddress -InterfaceAlias WAN
 Remove-NetIpAddress -InterfaceAlias LAN1
 
-# присваиваем адреса
+# РїСЂРёСЃРІР°РёРІР°РµРј Р°РґСЂРµСЃР°
 
 New-NetIpAddress -InterfaceAlias WAN -IpAddress '10.0.1.1' -PrefixLength 24 -DefaultGateway '10.0.1.100'
 New-NetIpAddress -InterfaceAlias LAN1 -IpAddress '192.168.1.1' -PrefixLength 24
 
-# отключаем файрволл
+# РѕС‚РєР»СЋС‡Р°РµРј С„Р°Р№СЂРІРѕР»Р»
 
 Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
 
-# добавляем статические маршруты
+# РґРѕР±Р°РІР»СЏРµРј СЃС‚Р°С‚РёС‡РµСЃРєРёРµ РјР°СЂС€СЂСѓС‚С‹
 
-# включаем маршрутизацию (пока без RRAS)
+# РІРєР»СЋС‡Р°РµРј РјР°СЂС€СЂСѓС‚РёР·Р°С†РёСЋ (РїРѕРєР° Р±РµР· RRAS)
 
 Set-NetIPInterface -InterfaceAlias WAN -Forwarding Enabled
 Set-NetIPInterface -InterfaceAlias LAN1 -Forwarding Enabled
 
-# настраиваем DHCP сервер
+# РЅР°СЃС‚СЂР°РёРІР°РµРј DHCP СЃРµСЂРІРµСЂ
 
 Set-DhcpServerv4Binding -InterfaceAlias WAN -BindingState $false
 Set-DhcpServerv4Binding -InterfaceAlias LAN1 -BindingState $true
@@ -41,17 +41,17 @@ Set-DhcpServerv4Binding -InterfaceAlias LAN1 -BindingState $true
 Add-DhcpServerv4Scope -Name LAN1 -StartRange 192.168.1.2 -EndRange 192.168.1.254 -SubnetMask 255.255.255.0 -LeaseDuration 1.0:0:0 -State Active
 Set-DhcpServerv4OptionValue -ScopeId 192.168.1.0 -Router 192.168.1.1
 
-# поднимаем NAT
+# РїРѕРґРЅРёРјР°РµРј NAT
 
 netsh routing ip nat install
 netsh routing ip nat add interface WAN mode=full
 netsh routing ip nat add interface LAN1 mode=private
 
-# настраиваем RAS
+# РЅР°СЃС‚СЂР°РёРІР°РµРј RAS
 
 Install-RemoteAccess -VpnType VpnS2S
 
-# поднимаем и настраиваем VPN сервер
+# РїРѕРґРЅРёРјР°РµРј Рё РЅР°СЃС‚СЂР°РёРІР°РµРј VPN СЃРµСЂРІРµСЂ
 
 
 

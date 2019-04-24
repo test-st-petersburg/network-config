@@ -1,31 +1,31 @@
-# устанавливаем имена интерфейсов для последующего использования
+п»ї# СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РёРјРµРЅР° РёРЅС‚РµСЂС„РµР№СЃРѕРІ РґР»СЏ РїРѕСЃР»РµРґСѓСЋС‰РµРіРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ
 
 /interface ethernet
 set 0 name="LAN2"
 set 1 name="WAN"
 
-# присваиваем ip адреса
+# РїСЂРёСЃРІР°РёРІР°РµРј ip Р°РґСЂРµСЃР°
 
 /ip address
 remove [find]
-add interface="LAN2" address="192.168.2.1/24" 
-add interface="WAN" address="10.0.2.1/24" 
+add interface="LAN2" address="192.168.2.1/24"
+add interface="WAN" address="10.0.2.1/24"
 
-# добавляем статические маршруты
+# РґРѕР±Р°РІР»СЏРµРј СЃС‚Р°С‚РёС‡РµСЃРєРёРµ РјР°СЂС€СЂСѓС‚С‹
 
-# шлюз по умолчанию, в реальности не потребуется, должны получить с DHCP провайдера
+# С€Р»СЋР· РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ, РІ СЂРµР°Р»СЊРЅРѕСЃС‚Рё РЅРµ РїРѕС‚СЂРµР±СѓРµС‚СЃСЏ, РґРѕР»Р¶РЅС‹ РїРѕР»СѓС‡РёС‚СЊ СЃ DHCP РїСЂРѕРІР°Р№РґРµСЂР°
 /ip route
 remove [find static=yes]
 add dst-address=0.0.0.0/0 gateway=10.0.2.100 distance=100
 
-# включаем мониторинг статуса интерфейсов
+# РІРєР»СЋС‡Р°РµРј РјРѕРЅРёС‚РѕСЂРёРЅРі СЃС‚Р°С‚СѓСЃР° РёРЅС‚РµСЂС„РµР№СЃРѕРІ
 
 /interface detect-internet
 set detect-interface-list=all
 
 state print
 
-# поднимаем DHCP сервер и настраиваем его
+# РїРѕРґРЅРёРјР°РµРј DHCP СЃРµСЂРІРµСЂ Рё РЅР°СЃС‚СЂР°РёРІР°РµРј РµРіРѕ
 
 /ip pool
 remove [find]
@@ -43,17 +43,17 @@ remove [find]
 add name=LAN2 interface=LAN2 address-pool=LAN2 authoritative=yes lease-time=1d
 enable LAN2
 
-# поднимаем NAT
+# РїРѕРґРЅРёРјР°РµРј NAT
 
 /ip firewall nat
 remove [find]
 add action=masquerade chain=srcnat out-interface=WAN
 
-# настраиваем firewall
+# РЅР°СЃС‚СЂР°РёРІР°РµРј firewall
 
 /ip firewall filter
 remove [find]
-#разрешает входящий трафик от уже установленных соединений
+#СЂР°Р·СЂРµС€Р°РµС‚ РІС…РѕРґСЏС‰РёР№ С‚СЂР°С„РёРє РѕС‚ СѓР¶Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹С… СЃРѕРµРґРёРЅРµРЅРёР№
 add chain=input connection-state=established,related action=accept comment="enable incoming traffic from established connections"
 add chain=forward connection-state=established,related action=accept
 add chain=input connection-state=new protocol=icmp action=accept comment="enable incoming ICMP"
@@ -63,7 +63,7 @@ add chain=forward connection-state=new in-interface=LAN2 action=accept comment="
 
 add chain=input action=drop
 
-# настраиваем IPsec туннель и файрвол под него
+# РЅР°СЃС‚СЂР°РёРІР°РµРј IPsec С‚СѓРЅРЅРµР»СЊ Рё С„Р°Р№СЂРІРѕР» РїРѕРґ РЅРµРіРѕ
 
 /ip ipsec profile
 remove [find default=no and dynamic=no]
@@ -110,7 +110,7 @@ installed-sa print
 
 
 
-# настраиваем L2TP клиента
+# РЅР°СЃС‚СЂР°РёРІР°РµРј L2TP РєР»РёРµРЅС‚Р°
 
 /ip ipsec proposal
 add name="LAN1" auth-algorithms=sha1 enc-algorithms=3des lifetime=1d pfs-group=none
@@ -131,7 +131,7 @@ add auth-method=pre-shared-key secret=535353 peer=LAN1 disabled=no
 /interface l2tp-client
 add name="LAN1" connect-to=10.0.1.1 allow=mschap2 user=user2 password=Password2 add-default-route=no dial-on-demand=no keepalive-timeout=60 max-mru=1450 max-mtu=1450 mrru=1600 use-ipsec=yes ipsec-secret=535353 disabled=no
 
-# добавляем статические маршруты между сетями
+# РґРѕР±Р°РІР»СЏРµРј СЃС‚Р°С‚РёС‡РµСЃРєРёРµ РјР°СЂС€СЂСѓС‚С‹ РјРµР¶РґСѓ СЃРµС‚СЏРјРё
 
 /ip route add comment="LAN1 through VPN" dst-address=192.168.1.0/24 gateway=172.16.30.1 pref-src=192.168.2.1
 
