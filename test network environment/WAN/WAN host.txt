@@ -1,0 +1,28 @@
+# устанавливаем имена интерфейсов для последующего использования
+
+/interface
+ethernet set 0 name="WAN1"
+ethernet set 1 name="WAN2"
+
+# удаляем ip адреса для возможности переконфигурирования роутера выполнением скрипта
+
+/ip address
+remove [find]
+
+# присваиваем адреса
+
+add interface="WAN1" address="10.0.1.100/24"
+add interface="WAN2" address="10.0.2.100/24"
+
+# для автоматического мониторинга на роутерах GW1 и GW2
+add interface="WAN1" address="8.8.8.8/24"
+
+# добавляем статические маршруты
+
+#/ip route
+#add dst-address=192.168.1.0/24 gateway=10.0.1.1
+#add dst-address=192.168.2.0/24 gateway=10.0.2.1
+# убиваем их после включения NAT на маршрутизаторах
+#remove 2,3
+
+/

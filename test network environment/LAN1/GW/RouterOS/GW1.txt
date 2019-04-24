@@ -1,0 +1,141 @@
+/system identity set name=GW1
+
+# устанавливаем имена интерфейсов для последующего использования
+
+/interface ethernet
+set 0 name="LAN1"
+set 1 name="WAN"
+
+# присваиваем адреса
+
+/ip address
+remove [find]
+add interface="LAN1" address="192.168.1.1/24" 
+add interface="WAN" address="10.0.1.1/24" 
+
+# добавляем статические маршруты
+
+# шлюз по умолчанию, в реальности не потребуется, должны получить с DHCP провайдера
+/ip route
+	remove [find static=yes]
+	add dst-address=0.0.0.0/0 \
+		gateway=10.0.1.100 pref-src=10.0.1.1 distance=100
+
+# включаем мониторинг статуса интерфейсов
+
+/interface detect-internet
+set detect-interface-list=all
+
+state print
+
+# поднимаем DHCP сервер и настраиваем его
+
+/ip pool
+remove [find]
+add name=LAN1 ranges=192.168.1.2-192.168.1.254
+/ip dhcp-server option sets
+remove [find]
+add name=LAN1 options=""
+/ip dhcp-server network
+remove [find]
+add address=192.168.1.0/24 gateway=192.168.1.1 dns-none=yes dhcp-option-set=LAN1
+/ip dhcp-server
+remove [find]
+add name=LAN1 interface=LAN1 address-pool=LAN1 authoritative=yes lease-time=1d
+enable LAN1
+
+# поднимаем NAT
+
+/ip firewall nat
+remove [find]
+add action=masquerade chain=srcnat out-interface=WAN
+
+# настраиваем firewall
+
+/ip firewall filter
+remove [find]
+#разрешает входящий трафик от уже установленных соединений
+add chain=input connection-state=established,related action=accept comment="enable incoming traffic from established connections"
+add chain=forward connection-state=established,related action=accept
+add chain=input connection-state=new protocol=icmp action=accept comment="enable incoming ICMP"
+add chain=output connection-state=new protocol=icmp action=accept comment="enable outgoing ICMP"
+add chain=input connection-state=new in-interface=LAN2 action=accept comment="enable LAN traffic"
+add chain=forward connection-state=new in-interface=LAN2 action=accept comment="enable from LAN to WAN"
+
+add chain=input action=drop comment="default drop rule"
+
+# настраиваем IPsec туннель и файрвол под него
+
+/ip ipsec profile
+remove [find default=no and dynamic=no]
+add name=LAN2 dh-group=modp1024 enc-algorithm=3des
+#nat-traversal=yes
+
+/ip ipsec proposal
+remove [find default=no and dynamic=no]
+add name=LAN2 enc-algorithms=3des pfs-group=modp1024 auth-algorithms=sha1 disabled=no
+
+/ip ipsec peer
+remove [find]
+add name=LAN2 address=10.0.2.1/32 profile=LAN2 disabled=yes
+
+/ip ipsec identity
+remove [find dynamic=no]
+add peer=LAN2 secret=535353 disabled=no
+
+/ip ipsec policy
+remove [find default=no and dynamic=no]
+add src-address=192.168.1.0/24 src-port=any dst-address=192.168.2.0/24 dst-port=any sa-src-address=10.0.1.1 sa-dst-address=10.0.2.1 tunnel=yes action=encrypt proposal=LAN2 level=require ipsec-protocols=esp
+
+/ip firewall nat
+	add chain=srcnat action=accept \
+		src-address=192.168.1.0/24 dst-address=192.168.2.0/24 \
+		place-before=[find chain=srcnat and action=masquerade]
+
+# добавляем маршрут, чтобы пакеты в другие наши подсети
+# уходили с внутреннего интерфейса и попадали в ipsec туннель
+/ip route
+	add dst-address=192.168.2.0/24 \
+		gateway=10.0.1.100 pref-src=192.168.1.1 distance=1
+
+/ip ipsec peer enable LAN2
+
+/ip ipsec
+remote-peers print
+installed-sa print
+
+
+
+
+
+
+
+
+
+
+# настраиваем L2TP клиента
+
+/ip ipsec proposal
+add name="LAN1" auth-algorithms=sha1 enc-algorithms=3des lifetime=1d pfs-group=none
+set [ find default=yes ] enc-algorithms=3des pfs-group=none
+
+#/ip ipsec profile
+#add name="LAN1" hash-algorithm=sha1 enc-algorithm=3des gh-group=modp1024 #proposal-check=obey nat-traversal=yes dpd-interval=2m dpd-maximum-failures=5
+
+#/ip ipsec policy
+#add dst-address=10.0.1.1 protocol=all proposal=LAN1 tunnel=yes
+
+#/ip ipsec peer
+#add name="LAN1" address=10.0.1.1 profile=LAN1 disabled=no
+
+/ip ipsec identity
+add auth-method=pre-shared-key secret=535353 peer=LAN1 disabled=no
+
+/interface l2tp-client
+add name="LAN1" connect-to=10.0.1.1 allow=mschap2 user=user2 password=Password2 add-default-route=no dial-on-demand=no keepalive-timeout=60 max-mru=1450 max-mtu=1450 mrru=1600 use-ipsec=yes ipsec-secret=535353 disabled=no
+
+# добавляем статические маршруты между сетями
+
+/ip route add comment="LAN1 through VPN" dst-address=192.168.1.0/24 gateway=172.16.30.1 pref-src=192.168.2.1
+
+/

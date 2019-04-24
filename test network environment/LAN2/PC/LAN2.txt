@@ -1,0 +1,17 @@
+# устанавливаем имена интерфейсов для последующего использования
+
+/interface ethernet set 0 name="LAN"
+
+# удаляем ip адреса для возможности переконфигурирования роутера выполнением скрипта
+
+/ip address remove 0
+
+# настраиваем DHCP клиента
+
+/ip dhcp-client remove numbers=0
+/ip dhcp-client add interface=LAN disabled=no
+
+# присваиваем адреса
+
+/ip dhcp-client renew numbers=0
+

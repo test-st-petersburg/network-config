@@ -1,0 +1,603 @@
+#========================
+# Конфигурация интерфейса
+#========================
+pushd interface 
+
+
+popd
+# Конец конфигурации интерфейса
+
+
+
+# ----------------------------------
+# Конфигурация IPHTTPS
+# ----------------------------------
+pushd interface httpstunnel
+
+reset
+
+
+popd
+# Конец конфигурации IPHTTPS
+
+
+
+# ----------------------------------
+# Конфигурация IPv4
+# ----------------------------------
+pushd interface ipv4
+
+reset
+set global icmpredirects=disabled
+add route prefix=0.0.0.0/0 interface="WAN" nexthop=62.165.8.249 publish=Да
+set interface interface="Подключение по локальной сети* 9" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="WAN" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="LAN" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="LAN-Old" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="Ethernet" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+add address name="LAN-Old" address=192.168.0.200 mask=255.255.255.0
+add address name="WAN" address=62.165.8.250 mask=255.255.255.252
+
+
+popd
+# Конец конфигурации  IPv4
+
+
+
+# ----------------------------------
+# Конфигурация IPv6
+# ----------------------------------
+pushd interface ipv6
+
+reset
+set interface interface="Подключение по локальной сети* 9" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="LAN" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="isatap.csm.nov.ru" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="isatap.{C7D7C288-5EA1-4D0F-8BCC-70257E81EBCE}" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="isatap.{98332334-1CBD-4C5A-98FF-07A369028427}" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="Ethernet" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+set interface interface="isatap.{6E06F030-7526-11D2-BAF4-00600815A4BD}" forwarding=enabled advertise=enabled nud=enabled ignoredefaultroutes=disabled
+
+
+popd
+# Конец конфигурации  IPv6
+
+
+
+# ----------------------------------
+# Конфигурация ISATAP
+# ----------------------------------
+pushd interface isatap
+
+
+
+popd
+# Конец конфигурации ISATAP
+
+
+
+# ----------------------------------
+# Конфигурация 6to4
+# ----------------------------------
+pushd interface 6to4
+
+reset
+
+
+
+popd
+# Конец конфигурации 6to4
+
+
+
+# ----------------------------------
+# Конфигурация ISATAP
+# ----------------------------------
+pushd interface isatap
+
+
+
+popd
+# Конец конфигурации ISATAP
+
+
+#===========================
+# Конфигурация портов прокси
+#===========================
+pushd interface portproxy
+
+reset
+
+
+popd
+
+# Конец конфигурации портов прокси
+
+
+
+# ----------------------------------
+# Конфигурация TCP
+# ----------------------------------
+pushd interface tcp
+
+reset
+
+set global rss=enabled chimney=disabled autotuninglevel=normal congestionprovider=none ecncapability=enabled timestamps=disabled netdma=disabled dca=disabled initialrto=3000 rsc=enabled nonsackrttresiliency=disabled maxsynretransmissions=2
+
+
+popd
+# Конец конфигурации TCP
+
+
+
+# ----------------------------------
+# Конфигурация Teredo
+# ----------------------------------
+pushd interface teredo
+set state type=client servername=win8.ipv6.microsoft.com. servervirtualip=0.0.0.0
+
+
+
+popd
+# Конец конфигурации Teredo
+
+
+
+# ----------------------------------
+# Конфигурация 6to4
+# ----------------------------------
+pushd interface 6to4
+
+reset
+
+
+
+popd
+# Конец конфигурации 6to4
+
+
+# ------------------------------------
+# Настройка моста (не поддерживается)
+# ------------------------------------
+
+# ------------------------------------
+# Конец настройки моста
+# ------------------------------------
+
+Команда "netsh advfirewall dump" не реализована в этой версии
+Windows. Используйте вместо этого команду "netsh advfirewall export" для
+записи текущей конфигурации брандмауэра Windows в режиме
+ повышенной безопасности из текущего хранилища политик в файл на диске. Затем можно использовать команду "netsh
+advfirewall import" для чтения файла и его загрузки в другое хранилище политик, например в объект групповой политики или текущее хранилище политик на другом компьютере. Чтобы задать текущее хранилище политик, используйте команду "netsh
+advfirewall set store".
+Дополнительные сведения о командах в контексте netsh advfirewall
+см. в статье "Команды Netsh для брандмауэра Windows в режиме повышенной безопасности" по адресу
+http://go.microsoft.com/fwlink/?linkid=111237.pushd ipsecdosprotection
+reset
+popd
+
+# ----------------------------------------
+# Настройка проводной локальной сети
+# ----------------------------------------
+pushd lan
+
+
+popd
+
+# Конец настройки проводной локальной сети
+
+
+# ========================================================== 
+# Конфигурация центра регистрации работоспособности 
+# ========================================================== 
+pushd nap hra
+
+popd
+# Конец конфигурации HRA NAP 
+
+# ========================================================== 
+# Конфигурация клиента защиты сетевого доступа (NAP) 
+# ========================================================== 
+pushd nap client
+
+# ---------------------------------------------------------- 
+# Конфигурация доверенной группы серверов 
+# ---------------------------------- 
+
+reset trustedservergroup 
+
+# ---------------------------------------------------------- 
+# Конфигурация поставщика услуг шифрования (CSP) 
+# ---------------------------------------------------------- 
+
+set csp name = "Microsoft RSA SChannel Cryptographic Provider" keylength = "2048" 
+
+# ---------------------------------------------------------- 
+# Конфигурация алгоритма хэширования 
+# ---------------------------------- 
+
+set hash oid = "1.3.14.3.2.29" 
+
+# ---------------------------------------------------------- 
+# Конфигурация системы ограничений 
+# ---------------------------------------------------------- 
+
+set enforcement id = "79617" admin = "disable" id = "79619" admin = "disable" id = "79621" admin = "disable" id = "79623" admin = "disable" 
+# ---------------------------------------------------------- 
+# Конфигурация отслеживания 
+# ---------------------------------------------------------- 
+
+set tracing state = "disable" level = "basic" 
+
+# ---------------------------------------------------------- 
+# Конфигурация пользовательского интерфейса 
+# ---------------------------------------------------------- 
+
+reset userinterface 
+
+popd
+# Конец конфигурации клиента NAP 
+
+                                            
+# ----------------------------------------- 
+# Конфигурация RAS                          
+# ----------------------------------------- 
+pushd ras
+
+set authmode mode = standard
+delete authtype type = PAP
+delete authtype type = MD5CHAP
+delete authtype type = MSCHAPv2
+delete authtype type = EAP
+delete authtype type = CERT
+add authtype type = MSCHAPv2
+add authtype type = EAP
+delete link type = SWC
+delete link type = LCP
+add link type = SWC
+add link type = LCP
+delete multilink type = MULTI
+add multilink type = MULTI
+set conf confstate = enabled
+set type ipv4rtrtype = lananddd ipv6rtrtype = none rastype = ipv4
+set wanports device = "Мини-порт глобальной сети (SSTP)" rasinonly = disabled ddinout = disabled ddoutonly = disabled maxports = 128 
+set wanports device = "Мини-порт глобальной сети (IKEv2)" rasinonly = disabled ddinout = disabled ddoutonly = disabled maxports = 128 
+set wanports device = "Мини-порт глобальной сети (PPTP)" rasinonly = enabled ddinout = enabled ddoutonly = disabled maxports = 10 
+set wanports device = "Мини-порт глобальной сети (L2TP)" rasinonly = enabled ddinout = enabled ddoutonly = disabled maxports = 5 
+set wanports device = "Мини-порт глобальной сети (PPPOE)" ddoutonly = disabled
+
+set user name = Администратор dialin = policy cbpolicy = none 
+set user name = Гость dialin = policy cbpolicy = none 
+
+set ikev2connection idletimeout = 5 nwoutagetime = 30
+set ikev2saexpiry saexpirytime = 480 sadatasizelimit = 32767
+
+popd
+
+# Конец конфигурации RAS.                    
+                                             
+                                             
+
+                                            
+# ------------------------------------------- 
+# Конфигурация диагностики удаленного доступа   
+# ------------------------------------------- 
+pushd ras diagnostics
+
+set rastracing component = * state = disabled
+
+set modemtracing state = disabled
+
+set cmtracing state = disabled
+
+set securityeventlog state = disabled
+
+set loglevel events = all
+
+
+popd
+
+# Конец конфигурации диагностики удаленного доступа.
+                                                 
+                                                 
+
+                                            
+# ----------------------------------------- 
+# IP-конфигурация RAS                       
+# ----------------------------------------- 
+pushd ras ip
+
+delete pool
+
+set negotiation mode = allow
+set access mode = all
+set addrreq mode = deny
+set broadcastnameresolution mode = enabled
+set addrassign method = auto
+set preferredadapter name = "LAN"
+
+popd
+
+# Конец IP-конфигурации RAS.                 
+                                             
+
+                                            
+# ----------------------------------------- 
+# IPv6-конфигурация удаленного доступа          
+# ----------------------------------------- 
+pushd ras ipv6
+
+
+
+set negotiation mode = deny
+set access mode = serveronly
+set routeradvertise mode = disabled
+set prefix prefix = ::
+
+popd
+
+# Конец IPv6-конфигурации удаленного доступа.   
+                                             
+
+                                            
+# ----------------------------------------- 
+# Конфигурация удаленного доступа AAAA
+# ----------------------------------------- 
+pushd ras aaaa
+
+set authentication provider = windows
+set accounting provider = windows
+
+delete authserver name = *
+delete acctserver name = *
+
+
+
+popd
+
+# Конец AAAA-конфигурации.     
+                                               
+                                               
+# Настройка маршрутизации
+pushd routing
+reset
+popd
+# Конфигурация IP
+pushd routing ip
+reset
+set loglevel error
+add preferenceforprotocol proto=LOCAL preflevel=1
+add preferenceforprotocol proto=STATIC preflevel=3
+add preferenceforprotocol proto=NONDOD preflevel=5
+add preferenceforprotocol proto=AUTOSTATIC preflevel=7
+add preferenceforprotocol proto=NetMgmt preflevel=10
+add preferenceforprotocol proto=EBGP preflevel=20
+add preferenceforprotocol proto=RIP preflevel=120
+add preferenceforprotocol proto=IBGP preflevel=200
+add interface name="LAN" state=enable
+set filter name="LAN" fragcheck=disable
+add persistentroute dest=192.168.20.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.31 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.20.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.31 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.101.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.101.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.102.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.102.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.0.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.0.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.255.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.255.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=10.50.200.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.14 proto=NONDOD metric=256 view=both
+set persistentroute dest=10.50.200.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.14 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.88.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.88.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.255.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.255.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=10.250.74.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=10.250.74.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=10.250.4.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=10.250.4.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.4.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.4.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.1.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.1.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.2.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.2.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.3.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.3.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.11.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.11.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.12.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.12.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.19 proto=NONDOD metric=256 view=both
+add persistentroute dest=192.168.4.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.16 proto=NONDOD metric=256 view=both
+set persistentroute dest=192.168.4.0 mask=255.255.255.0 name="LAN" nhop=192.168.100.16 proto=NONDOD metric=256 view=both
+add interface name="Подключение по локальной сети* 9" state=enable
+set filter name="Подключение по локальной сети* 9" fragcheck=disable
+add interface name="WAN" state=enable
+set filter name="WAN" fragcheck=disable
+add interface name="LAN-Old" state=enable
+set filter name="LAN-Old" fragcheck=disable
+add interface name="Внутренний" state=enable
+add interface name="Замыкание на себя" state=enable
+popd
+# Конец конфигурации IP
+
+
+
+# ----------------------------------------- 
+# RAS-конфигурация                          
+# ----------------------------------------- 
+pushd routing ip dnsproxy
+uninstall
+
+
+popd
+# Конец конфигурации DNS-прокси
+
+
+
+# ----------------------------------------- 
+# Настройка протокола IGMP                          
+# ----------------------------------------- 
+pushd routing ip igmp
+uninstall
+install
+set global loglevel = ERROR
+
+
+popd
+# Конец настройки протокола IGMP
+
+
+
+# ----------------------------------------- 
+# RAS-конфигурация                          
+# ----------------------------------------- 
+pushd routing ip nat
+uninstall
+install
+set global tcptimeoutmins=1440 udptimeoutmins=1 loglevel=ERROR
+
+
+#
+# NAT-конфигурация для интерфейса "LAN"
+#
+add interface name="LAN" mode=PRIVATE
+
+
+#
+# NAT-конфигурация для интерфейса "WAN"
+#
+add interface name="WAN" mode=FULL
+
+
+#
+# NAT-конфигурация для интерфейса "LAN-Old"
+#
+add interface name="LAN-Old" mode=PRIVATE
+
+
+#
+# NAT-конфигурация для интерфейса "Внутренний"
+#
+add interface name="Внутренний" mode=PRIVATE
+
+
+popd
+
+
+
+
+# -----------------------------------------
+# Конфигурация агента DHCP-ретрансляции
+# -----------------------------------------
+pushd routing ip relay
+uninstall
+install
+set global loglevel=ERROR
+
+
+
+#
+#Конфигурация агента DHCP-ретрансляции для интерфейса ""Внутренний""
+#
+add interface name="Внутренний" 
+set interface name="Внутренний" relaymode=enable maxhop=4 minsecs=4
+
+
+
+popd
+# Конец DHCP-конфигурации
+
+
+
+# -----------------------------------------
+# IGMP-конфигурация
+# -----------------------------------------
+pushd routing ip rip
+uninstall
+
+
+popd
+# Конец RIP-конфигурации
+
+
+
+# ----------------------------------------- 
+# Настройка обнаружения маршрутизатора       
+# ----------------------------------------- 
+pushd routing ip routerdiscovery
+uninstall
+add interface name="LAN" disc=disable minint=7 maxint=10 life=30 level=0
+add interface name="Подключение по локальной сети* 9" disc=disable minint=7 maxint=10 life=30 level=0
+add interface name="WAN" disc=disable minint=7 maxint=10 life=30 level=0
+add interface name="LAN-Old" disc=disable minint=7 maxint=10 life=30 level=0
+add interface name="Внутренний" disc=disable minint=7 maxint=10 life=30 level=0
+add interface name="Замыкание на себя" disc=disable minint=7 maxint=10 life=30 level=0
+
+
+popd
+
+
+# ----------------------------------------- 
+# Конфигурация DHCP-распределителя             
+# ----------------------------------------- 
+pushd routing ip autodhcp
+uninstall
+
+
+popd
+# Конец параметров конфигурации DHCP-распределителя
+
+# Конфигурация IPv6
+pushd routing ipv6
+set filter name="Подключение по локальной сети* 9" fragcheck=disable
+popd
+# Конец конфигурации  IPv6
+
+
+
+# ---------------------------------- 
+# Конфигурация агента DHCPv6-ретрансляции     
+# ---------------------------------- 
+pushd routing ipv6 relayv6
+uninstall
+
+
+popd
+# Окончание конфигурации ретрансляции DHCPv6
+
+
+                                            
+# -----------------------------------------------------------------------  
+# Конфигурация вызова по требованию для удаленного доступа                 
+# -----------------------------------------------------------------------  
+# Работа этого сценария в системах с различными     
+# физическими устройствами вызова по требованию, например модемами, не
+# гарантирована. Перед выполнением этого сценария 
+# все устройства должны быть установлены с одним и тем же именем и портом   
+# ----------------------------------------------------------------------- 
+# Известные проблемы и ограничения : 
+# 1. Пользователю необходимо указать пароль для учетных данных исходящих
+# вызовов 
+# для каждого интерфейса, перечисленного ниже, либо в этом сценарии,
+# либо позднее 
+# с помощью консоли управления (MMC) или команды "ro demanddial
+# set credentials".                         
+# 2. Пользователю необходимо вручную задать параметры EAP, например PEAP, либо
+# установить на компьютере смарт-карту или другие сертификаты         
+
+pushd ro demanddial
+
+
+
+# -----------------------------------------
+# Конфигурация WinHTTP прокси
+# -----------------------------------------
+pushd winhttp
+
+reset proxy
+
+popd
+
+# Конец конфигурации WinHTTP прокси
+
