@@ -10,6 +10,7 @@
 		"Gruntfuggly.todo-tree",
 		"DavidAnson.vscode-markdownlint",
 		"bierner.markdown-preview-github-styles",
+		"knisterpeter.vscode-commitizen",
 		"ms-vscode.PowerShell",
 		"timonwong.shellcheck"
 	]
