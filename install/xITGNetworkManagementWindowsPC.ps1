@@ -27,4 +27,9 @@ configuration ITGNetworkManagementWindowsPC
         DependsOn = @('[cChocoInstaller]choco')
     }
 
+    cChocoPackageInstaller NodeJS {
+        Name      = 'nodejs'
+        DependsOn = @('[cChocoInstaller]choco')
+    }
+
 }

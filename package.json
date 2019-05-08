@@ -1,0 +1,15 @@
+{
+  "name": "network-config",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/test-st-petersburg/network-config.git"
+  },
+  "author": "Sergei S. Betke",
+  "devDependencies": {
+    "@commitlint/cli": "^7.6.0",
+    "cz-customizable": "^6.0.0",
+    "husky": "^2.2.0"
+  }
+}
