@@ -8,10 +8,12 @@
 		"EditorConfig.EditorConfig",
 		"sleistner.vscode-fileutils",
 		"Gruntfuggly.todo-tree",
+		"heaths.vscode-guid",
 		"DavidAnson.vscode-markdownlint",
 		"bierner.markdown-preview-github-styles",
 		"knisterpeter.vscode-commitizen",
 		"ms-vscode.PowerShell",
-		"timonwong.shellcheck"
+		"timonwong.shellcheck",
+		"bewhite.dokd-vscode-preview"
 	]
 }
