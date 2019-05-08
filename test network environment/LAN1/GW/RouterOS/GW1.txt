@@ -96,7 +96,7 @@ add src-address=192.168.1.0/24 src-port=any dst-address=192.168.2.0/24 dst-port=
 # уходили с внутреннего интерфейса и попадали в ipsec туннель
 /ip route
 	add dst-address=192.168.2.0/24 \
-		gateway=10.0.1.100 pref-src=192.168.1.1 distance=1
+		pref-src=192.168.1.1 gateway=WAN distance=1
 
 /ip ipsec peer enable LAN2
 
