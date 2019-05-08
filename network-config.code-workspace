@@ -5,7 +5,48 @@
 		}
 	],
 	"settings": {
+		"files.exclude": {
+			".git": true,
+			"node_modules/": true
+		},
 		"shellcheck.customArgs": ["-x"],
-		"shellcheck.exclude": [2039]
+		"shellcheck.exclude": [2039],
+		"files.associations": {
+			"*.netsh": "bat"
+		},
+		"[bat]":{
+			"files.encoding": "cp866"
+		},
+		"powershell.codeFormatting.alignPropertyValuePairs": false,
+		"powershell.codeFormatting.openBraceOnSameLine": false,
+		"powershell.codeFormatting.newLineAfterOpenBrace": false,
+		"powershell.codeFormatting.newLineAfterCloseBrace": true,
+		"powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
+		"powershell.codeFormatting.whitespaceBeforeOpenParen": true,
+		"powershell.codeFormatting.whitespaceAroundOperator": true,
+		"powershell.codeFormatting.whitespaceAfterSeparator": true,
+		"powershell.codeFormatting.ignoreOneLineBlock": false,
+		"powershell.codeFormatting.preset": "Custom",
+		"files.trimTrailingWhitespace": true,
+		"files.insertFinalNewline": true
 	},
+	"extensions": {
+		// See http://go.microsoft.com/fwlink/?LinkId=827846
+		// for the documentation about the extensions.json format
+		"recommendations": [
+			"eamodio.gitlens",
+			"vector-of-bool.gitflow",
+			"sidneys1.gitconfig",
+			"EditorConfig.EditorConfig",
+			"sleistner.vscode-fileutils",
+			"Gruntfuggly.todo-tree",
+			"heaths.vscode-guid",
+			"DavidAnson.vscode-markdownlint",
+			"bierner.markdown-preview-github-styles",
+			"knisterpeter.vscode-commitizen",
+			"ms-vscode.PowerShell",
+			"timonwong.shellcheck",
+			"bewhite.dokd-vscode-preview"
+		]
+	}
 }
