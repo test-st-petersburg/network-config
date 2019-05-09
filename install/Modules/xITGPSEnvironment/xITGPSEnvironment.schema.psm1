@@ -27,6 +27,14 @@
     PSModuleResource xWinRM {
         Ensure      = "Present"
         Module_Name = "xWinRM"
-    }
+	}
+
+    PSModuleResource xComputerManagement {
+        Module_Name = 'xComputerManagement'
+	}
+
+    PSModuleResource xHyper-V {
+        Module_Name = 'xHyper-V'
+	}
 
 }

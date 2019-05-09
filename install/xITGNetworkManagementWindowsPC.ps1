@@ -6,6 +6,8 @@ configuration ITGNetworkManagementWindowsPC
 {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName cChoco
+	Import-DscResource -ModuleName xComputerManagement
+	Import-DscResource -ModuleName xHyper-V
 
     cChocoInstaller choco
     {
