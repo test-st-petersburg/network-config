@@ -37,4 +37,11 @@ configuration ITGNetworkManagementWindowsPC
         DependsOn = @('[cChocoInstaller]choco')
     }
 
+    WindowsOptionalFeatureSet HyperV
+    {
+        Name = 'Microsoft-Hyper-V-All', 'Microsoft-Hyper-V-Tools-All'
+        Ensure = 'Enable'
+        NoWindowsUpdateCheck = $true
+    }
+
 }

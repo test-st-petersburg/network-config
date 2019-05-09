@@ -24,6 +24,10 @@ $DSCConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'DSCconfig');
 ITGDSCEnvironment -OutputPath $DSCConfigDir;
 Start-DscConfiguration -Path $DSCConfigDir -Wait -Verbose -ErrorAction Stop;
 
+$PSDefaultParameterValues = @{
+    'Enable-WindowsOptionalFeature:NoRestart' = $true
+}
+
 . (Join-Path -Path $PSScriptRoot -ChildPath 'xITGNetworkManagementWindowsPC.ps1');
 $ConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'config');
 ITGNetworkManagementWindowsPC -OutputPath $ConfigDir;
