@@ -40,4 +40,9 @@
         Module_Name = 'xHyper-V'
     }
 
+    PSModuleResource Lability
+    {
+        Module_Name = 'Lability'
+    }
+
 }

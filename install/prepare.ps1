@@ -4,6 +4,14 @@
 
 $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 
+$PSDefaultParameterValues = @{
+	'*:ErrorAction' = [System.Management.Automation.ActionPreference]::Stop;
+	'Start-DscConfiguration:Wait' = $true;
+	'Start-DscConfiguration:Verbose' = $true;
+    'Start-LabHostConfiguration:Verbose' = $true;
+    'Start-LabConfiguration:Verbose' = $true;
+}
+
 # TODO: через GPO
 #Set-ExecutionPolicy -ExecutionPolicy Unrestricted;
 #Enable-PSRemoting -Force;
@@ -16,19 +24,21 @@ $ModulesDir = (Join-Path -Path $PSScriptRoot -ChildPath 'Modules');
 
 Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xITGPSEnvironment') -Force;
 $PSConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'PSconfig');
-ITGPSEnvironment -OutputPath $PSConfigDir;
-Start-DscConfiguration -Path $PSConfigDir -Wait -Verbose -ErrorAction Stop;
+$null = ITGPSEnvironment -OutputPath $PSConfigDir;
+Start-DscConfiguration -Path $PSConfigDir;
 
 Import-Module (Join-Path -Path $ModulesDir -ChildPath 'xITGDSCEnvironment') -Force;
 $DSCConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'DSCconfig');
-ITGDSCEnvironment -OutputPath $DSCConfigDir;
-Start-DscConfiguration -Path $DSCConfigDir -Wait -Verbose -ErrorAction Stop;
-
-$PSDefaultParameterValues = @{
-    'Enable-WindowsOptionalFeature:NoRestart' = $true
-}
+$null = ITGDSCEnvironment -OutputPath $DSCConfigDir;
+Start-DscConfiguration -Path $DSCConfigDir;
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'xITGNetworkManagementWindowsPC.ps1');
 $ConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'config');
-ITGNetworkManagementWindowsPC -OutputPath $ConfigDir;
-Start-DscConfiguration -Path $ConfigDir -Wait -Verbose -ErrorAction Stop;
+$null = ITGNetworkManagementWindowsPC -OutputPath $ConfigDir;
+Start-DscConfiguration -Path $ConfigDir;
+
+$NetworkVirtualTestLabConfiguration = Import-PowerShellDataFile -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath 'xITGNetworkVirtualTestLab.psd1');
+Start-LabHostConfiguration -IgnorePendingReboot;
+Start-LabConfiguration -ConfigurationData $NetworkVirtualTestLabConfiguration `
+    -Password ( ConvertTo-SecureString 'P@ssw0rd' -AsPlainText -Force ) `
+    -IgnorePendingReboot -SkipMofCheck -NoSnapshot;
