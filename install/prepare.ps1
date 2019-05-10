@@ -37,8 +37,10 @@ $ConfigDir = (Join-Path -Path $PSScriptRoot -ChildPath 'config');
 $null = ITGNetworkManagementWindowsPC -OutputPath $ConfigDir;
 Start-DscConfiguration -Path $ConfigDir;
 
+<#
 $NetworkVirtualTestLabConfiguration = Import-PowerShellDataFile -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath 'xITGNetworkVirtualTestLab.psd1');
 Start-LabHostConfiguration -IgnorePendingReboot;
 Start-LabConfiguration -ConfigurationData $NetworkVirtualTestLabConfiguration `
     -Password ( ConvertTo-SecureString 'P@ssw0rd' -AsPlainText -Force ) `
     -IgnorePendingReboot -SkipMofCheck -NoSnapshot;
+#>

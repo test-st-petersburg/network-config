@@ -45,4 +45,14 @@
         Module_Name = 'Lability'
     }
 
+    PSModuleResource xPendingReboot
+    {
+        Module_Name = 'xPendingReboot'
+    }
+
+    PSModuleResource xDownloadFile
+    {
+        Module_Name = 'xDownloadFile'
+    }
+
 }

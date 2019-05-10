@@ -8,6 +8,8 @@ configuration ITGNetworkManagementWindowsPC
     Import-DscResource -ModuleName cChoco
     Import-DscResource -ModuleName xComputerManagement
     Import-DscResource -ModuleName xHyper-V
+    Import-DSCResource -ModuleName xPendingReboot
+    Import-DSCResource -ModuleName xDownloadFile
 
     cChocoInstaller choco
     {
@@ -39,40 +41,49 @@ configuration ITGNetworkManagementWindowsPC
         DependsOn = @('[cChocoInstaller]choco')
     }
 
-    <#
     WindowsOptionalFeatureSet HyperV
     {
         Name = 'Microsoft-Hyper-V-All', 'Microsoft-Hyper-V-Tools-All'
         Ensure = 'Enable'
         NoWindowsUpdateCheck = $true
+	}
+	<#
+    xPendingReboot PendingRebootAfterHyperVInstallation
+    {
+        Name = 'Check for a pending reboot after Hyper-V installation'
+		SkipWindowsUpdate = $true
+		SkipCcmClientSDK = $true
+		DependsOn = @('[WindowsOptionalFeatureSet]HyperV')
     }
+    LocalConfigurationManager
+    {
+        RebootNodeIfNeeded = $True
+	}
+	#>
 
-	xVMSwitch LAN1
+    xVMSwitch LAN1
     {
         Name = 'LAN1'
         Type = 'Private'
-        DependsOn = "[WindowsOptionalFeatureSet]HyperV"
+        DependsOn = @('[WindowsOptionalFeatureSet]HyperV', '[xPendingReboot]PendingRebootAfterHyperVInstallation')
     }
-
     xVMSwitch LAN2
     {
         Name = 'LAN1'
         Type = 'Private'
-        DependsOn = "[WindowsOptionalFeatureSet]HyperV"
+        DependsOn = @('[WindowsOptionalFeatureSet]HyperV', '[xPendingReboot]PendingRebootAfterHyperVInstallation')
     }
-
     xVMSwitch WAN1
     {
         Name = 'WAN1'
         Type = 'Private'
-        DependsOn = "[WindowsOptionalFeatureSet]HyperV"
+        DependsOn = @('[WindowsOptionalFeatureSet]HyperV', '[xPendingReboot]PendingRebootAfterHyperVInstallation')
     }
-
     xVMSwitch WAN2
     {
         Name = 'WAN2'
         Type = 'Private'
-        DependsOn = "[WindowsOptionalFeatureSet]HyperV"
+        DependsOn = @('[WindowsOptionalFeatureSet]HyperV', '[xPendingReboot]PendingRebootAfterHyperVInstallation')
     }
 
 	$NetworkVirtualTestLabPath = Join-Path -Path $env:SystemDrive -ChildPath 'NetworkVirtualTestLab'
@@ -80,12 +91,23 @@ configuration ITGNetworkManagementWindowsPC
 		Type = 'Directory'
 		DestinationPath = $NetworkVirtualTestLabPath
 	}
-
-	$NetworkVirtualTestLabVMsPath = Join-Path -Path $NetworkVirtualTestLabPath -ChildPath 'VMs'
-	File NetworkVirtualTestLabVMs {
+	$NetworkVirtualTestLabMediaPath = Join-Path -Path $NetworkVirtualTestLabPath -ChildPath 'MasterVirtualHardDisks'
+	File NetworkVirtualTestLabMediaRoot {
 		Type = 'Directory'
-		DestinationPath = $NetworkVirtualTestLabVMsPath
+		DestinationPath = $NetworkVirtualTestLabMediaPath
+        DependsOn = '[File]NetworkVirtualTestLabRoot'
 	}
-	#>
+
+	# TODO: добавить автоматическое определение текущей стабильной версии RouterOS
+	$RouterOSVersion = '6.44.3'
+	$RouterOSImageFileName = 'RouterOS.vhdx'
+	# $RouterOSImagePath = Join-Path -Path $NetworkVirtualTestLabMediaPath -ChildPath $RouterOSImageFileName
+	xDownloadFile RouterOSImage {
+		FileName = $RouterOSImageFileName
+		SourcePath = "http://download2.mikrotik.com/routeros/$RouterOSVersion/chr-$RouterOSVersion.vhdx"
+		# 'https://download.mikrotik.com/' требует дополнительных заголовков
+		DestinationDirectoryPath = $NetworkVirtualTestLabMediaPath
+        DependsOn = '[File]NetworkVirtualTestLabMediaRoot'
+	}
 
 }
