@@ -156,6 +156,15 @@ configuration ITGNetworkManagementWindowsPC
                 '[WindowsOptionalFeatureSet]HyperV',
                 '[File]GW1VHD'
             )
-        }
+		}
+		xVMNetworkAdapter RemoveDefaultNICGW1
+		{
+			Id = 'GW1 default NIC'
+			Name = '*'
+			SwitchName = 'LAN1'
+			VMName = 'GW1'
+			Ensure = 'Absent'
+		}
+
     }
 }
