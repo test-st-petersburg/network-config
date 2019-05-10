@@ -9,12 +9,12 @@
             StartupMemory = 256MB
             MinimumMemory = 256MB
             MaximumMemory = 256MB
-			ProcessorCount = 1
-			Media = 'RouterOS'
-			Generation = 1
-			SecureBoot = $false
+            ProcessorCount = 1
+            Media = 'RouterOS'
+            Generation = 1
+            SecureBoot = $false
 
-			# Lab Password - assigned to Administrator and Users
+            # Lab Password - assigned to Administrator and Users
             # LabPassword = 'P@ssw0rd'
         }
 
@@ -28,8 +28,8 @@
             NodeName = 'GW1'
             SwitchName = 'LAN1', 'WAN1'
             BootOrder = 2
-			BootDelay = 60
-		}
+            BootDelay = 60
+        }
         @{
             NodeName = 'WS1'
             SwitchName = 'LAN1'
@@ -40,7 +40,7 @@
             NodeName = 'GW2'
             SwitchName = 'LAN2', 'WAN2'
             BootOrder = 2
-			BootDelay = 60
+            BootDelay = 60
         }
         @{
             NodeName = 'WS2'
@@ -51,19 +51,22 @@
 
     NonNodeData = @{
         Lability = @{
-			EnvironmentPrefix = 'test-net-config-' # this will prefix the VM names
+            EnvironmentPrefix = 'test-net-config-' # this will prefix the VM names
 
             Media = (
                 @{
-					Id = 'RouterOS'
+                    Id = 'RouterOS'
                     ImageName = 'RouterOS cloud hosted router'
                     Description = 'RouterOS cloud hosted router'
-					MediaType = 'VHD'
-					Architecture = 'x64'
+                    MediaType = 'VHD'
+                    Architecture = 'x64'
                     OperatingSystem = 'Linux'
-					Filename = 'RouterOS.vhdx'
-					Uri = 'http://download2.mikrotik.com/routeros/6.44.3/chr-6.44.3.vhdx'
-					# 'https://download.mikrotik.com/' требует дополнительных заголовков
+                    Filename = 'RouterOS.vhdx'
+                    Uri = 'http://download2.mikrotik.com/routeros/6.44.3/chr-6.44.3.vhdx'
+                    # 'https://download.mikrotik.com/' требует дополнительных заголовков
+                    CustomData = @{
+                        VmGeneration = 1;
+                    }
                 }
             )
 
@@ -94,7 +97,7 @@
                 #@{ Name = 'xPendingReboot'; RequiredVersion = '0.3.0.0'; }
             )
 
-			Resource = @(
+            Resource = @(
             )
         }
     }
