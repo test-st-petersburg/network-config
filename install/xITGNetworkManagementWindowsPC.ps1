@@ -115,56 +115,59 @@ configuration ITGNetworkManagementWindowsPC
             DependsOn = '[File]NetworkVirtualTestLabMediaRoot'
         }
 
-		foreach ( $Network in @( 'LAN1', 'LAN2', 'WAN1', 'WAN2' ) )
-		{
-			xVMSwitch $Network
-			{
-				Name = $Network
-				Type = 'Private'
-				DependsOn = @(
-					'[WindowsOptionalFeatureSet]HyperV'
-				)
-			}
-		}
-
-		$RouterOSVMs = 'WAN', 'GW1', 'GW2', 'WS1', 'WS2'
-		$RouterOSVHDs = @{}
-		foreach ( $RouterOSVM in $RouterOSVMs )
-		{
-			$RouterOSVHDs.Add( $RouterOSVM, ( Join-Path -Path $VhdPath -ChildPath ( $RouterOSVM + [System.IO.Path]::GetExtension( $RouterOSImagePath ) ) ) )
-			File "${RouterOSVM}VHD"
-			{
-				Type = 'File'
-				SourcePath = $RouterOSImagePath
-				DestinationPath = $RouterOSVHDs[$RouterOSVM]
-				DependsOn = @( '[File]NetworkVirtualTestLabVHDRoot', '[xDownloadFile]RouterOSImage' )
-			}
-		}
-
-		xVMHyperV GW1
+        foreach ( $Network in @( 'LAN1', 'LAN2', 'WAN1', 'WAN2' ) )
         {
-			Name = 'GW1'
-			Path = $VMsPath
-            VhdPath = $RouterOSVHDs['GW1']
-			Generation = 1
-			EnableGuestService = $false
-			StartupMemory = 256MB
-			MinimumMemory = 256MB
-			MaximumMemory = 256MB
-			ProcessorCount = 1
-            DependsOn = @(
-                '[WindowsOptionalFeatureSet]HyperV',
-                '[File]GW1VHD'
-            )
-		}
-		xVMNetworkAdapter RemoveDefaultNICGW1
-		{
-			Id = 'GW1 default NIC'
-			Name = '*'
-			SwitchName = 'LAN1'
-			VMName = 'GW1'
-			Ensure = 'Absent'
-		}
+            xVMSwitch $Network
+            {
+                Name = $Network
+                Type = 'Private'
+                DependsOn = @(
+                    '[WindowsOptionalFeatureSet]HyperV'
+                )
+            }
+        }
+
+        $RouterOSVMs = 'WAN', 'GW1', 'GW2', 'WS1', 'WS2'
+        $RouterOSVHDs = @{}
+        foreach ( $RouterOSVM in $RouterOSVMs )
+        {
+            $RouterOSVHDs.Add( $RouterOSVM, ( Join-Path -Path $VhdPath -ChildPath ( $RouterOSVM + [System.IO.Path]::GetExtension( $RouterOSImagePath ) ) ) )
+            File "${RouterOSVM}VHD"
+            {
+                Type = 'File'
+                SourcePath = $RouterOSImagePath
+                DestinationPath = $RouterOSVHDs[$RouterOSVM]
+                DependsOn = @(
+                    '[File]NetworkVirtualTestLabVHDRoot',
+                    '[xDownloadFile]RouterOSImage'
+                )
+            }
+            xVMHyperV $RouterOSVM
+            {
+                Name = $RouterOSVM
+                Path = $VMsPath
+                VhdPath = $RouterOSVHDs[$RouterOSVM]
+                Generation = 1
+                EnableGuestService = $false
+                StartupMemory = 256MB
+                MinimumMemory = 256MB
+                MaximumMemory = 256MB
+                ProcessorCount = 1
+                DependsOn = @(
+                    '[WindowsOptionalFeatureSet]HyperV',
+                    "[File]${RouterOSVM}VHD"
+                )
+            }
+            xVMNetworkAdapter "RemoveDefaultNIC${RouterOSVM}"
+            {
+                Id = "${RouterOSVM} default NIC"
+                Name = '*'
+                SwitchName = '*'
+                VMName = $RouterOSVM
+                Ensure = 'Absent'
+                DependsOn = "[xVMHyperV]${RouterOSVM}"
+            }
+        }
 
     }
 }
