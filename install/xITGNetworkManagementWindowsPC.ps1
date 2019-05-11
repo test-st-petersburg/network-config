@@ -1,6 +1,10 @@
 #Requires -Version 5.0
 #Requires -Modules PSDesiredStateConfiguration
 #Requires -Modules cChoco
+#Requires -Modules xComputerManagement
+#Requires -Modules xHyper-V
+#Requires -Modules xPendingReboot
+#Requires -Modules xDownloadFile
 
 configuration ITGNetworkManagementWindowsPC
 {
@@ -40,11 +44,11 @@ configuration ITGNetworkManagementWindowsPC
             DependsOn = @('[cChocoInstaller]choco')
         }
 
-        cChocoPackageInstaller VSCode
+		cChocoPackageInstaller VSCode
         {
             Name = 'vscode'
             DependsOn = @('[cChocoInstaller]choco')
-        }
+		}
 
         cChocoPackageInstaller git
         {
