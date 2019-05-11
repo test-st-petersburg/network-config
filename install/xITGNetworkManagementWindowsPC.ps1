@@ -44,11 +44,11 @@ configuration ITGNetworkManagementWindowsPC
             DependsOn = @('[cChocoInstaller]choco')
         }
 
-		cChocoPackageInstaller VSCode
+        cChocoPackageInstaller VSCode
         {
             Name = 'vscode'
             DependsOn = @('[cChocoInstaller]choco')
-		}
+        }
 
         cChocoPackageInstaller git
         {
@@ -117,7 +117,17 @@ configuration ITGNetworkManagementWindowsPC
             # 'https://download.mikrotik.com/' требует дополнительных заголовков
             DestinationDirectoryPath = $MediaPath
             DependsOn = '[File]NetworkVirtualTestLabMediaRoot'
-        }
+		}
+		$RouterOSVhdMaximumSizeBytes = 256MB
+		xVHD RouterOSImage
+		{
+			Name = $RouterOSImageFileName
+			Type = 'Dynamic'
+			Generation = 'Vhdx'
+			Path = $MediaPath
+			MaximumSizeBytes = $RouterOSVhdMaximumSizeBytes
+			DependsOn = '[xDownloadFile]RouterOSImage'
+		}
 
         foreach ( $Network in @( 'LAN1', 'LAN2', 'WAN1', 'WAN2' ) )
         {
@@ -132,25 +142,28 @@ configuration ITGNetworkManagementWindowsPC
         }
 
         $RouterOSVMs = 'WAN', 'GW1', 'GW2', 'WS1', 'WS2'
-        $RouterOSVHDs = @{}
         foreach ( $RouterOSVM in $RouterOSVMs )
         {
-            $RouterOSVHDs.Add( $RouterOSVM, ( Join-Path -Path $VhdPath -ChildPath ( $RouterOSVM + [System.IO.Path]::GetExtension( $RouterOSImagePath ) ) ) )
-            File "${RouterOSVM}VHD"
+			$RouterOSVhdFileName = $RouterOSVM + [System.IO.Path]::GetExtension( $RouterOSImagePath )
+            $RouterOSVhdPath = Join-Path -Path $VhdPath -ChildPath $RouterOSVhdFileName
+            xVHD "${RouterOSVM}VHD"
             {
-                Type = 'File'
-                SourcePath = $RouterOSImagePath
-                DestinationPath = $RouterOSVHDs[$RouterOSVM]
+				Name = $RouterOSVhdFileName
+				Type = 'Differencing'
+				Generation = 'Vhdx'
+                Path = $VhdPath
+                ParentPath = $RouterOSImagePath
+				MaximumSizeBytes = $RouterOSVhdMaximumSizeBytes
                 DependsOn = @(
                     '[File]NetworkVirtualTestLabVHDRoot',
-                    '[xDownloadFile]RouterOSImage'
+                    '[xVHD]RouterOSImage'
                 )
             }
             xVMHyperV $RouterOSVM
             {
                 Name = $RouterOSVM
                 Path = $VMsPath
-                VhdPath = $RouterOSVHDs[$RouterOSVM]
+                VhdPath = $RouterOSVhdPath
                 Generation = 1
                 EnableGuestService = $false
                 StartupMemory = 256MB
@@ -159,7 +172,7 @@ configuration ITGNetworkManagementWindowsPC
                 ProcessorCount = 1
                 DependsOn = @(
                     '[WindowsOptionalFeatureSet]HyperV',
-                    "[File]${RouterOSVM}VHD"
+                    "[xVHD]${RouterOSVM}VHD"
                 )
             }
             xVMNetworkAdapter "RemoveDefaultNIC${RouterOSVM}"
