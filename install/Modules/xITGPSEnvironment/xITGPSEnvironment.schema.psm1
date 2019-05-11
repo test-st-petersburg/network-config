@@ -33,6 +33,11 @@
             Module_Name = 'cChoco'
         }
 
+        PSModuleResource vscode
+        {
+            Module_Name = 'vscode'
+        }
+
         PSModuleResource xWinRM
         {
             Module_Name = 'xWinRM'
