@@ -34,6 +34,8 @@ configuration ITGNetworkManagementWindowsPC
     Node $ComputerName
     {
 
+        #region common software
+
         cChocoInstaller choco
         {
             InstallDir = "${env:SystemDrive}\choco"
@@ -84,6 +86,9 @@ configuration ITGNetworkManagementWindowsPC
 		}
 		#>
 
+        #endregion common software
+        #region virtual lab folders
+
         File NetworkVirtualTestLabRoot
         {
             Type = 'Directory'
@@ -108,6 +113,9 @@ configuration ITGNetworkManagementWindowsPC
             DependsOn = '[File]NetworkVirtualTestLabRoot'
         }
 
+        #endregion virtual lab folders
+        #region RouterOS image
+
         # TODO: добавить автоматическое определение текущей стабильной версии RouterOS
         $RouterOSVersion = '6.44.3'
         $RouterOSImageFileName = 'RouterOS.vhdx'
@@ -131,6 +139,9 @@ configuration ITGNetworkManagementWindowsPC
             DependsOn = '[xDownloadFile]RouterOSImage'
         }
 
+        #endregion RouterOS image
+        #region virtual lab networks
+
         foreach ( $Network in @( 'LAN1', 'LAN2', 'WAN1', 'WAN2' ) )
         {
             xVMSwitch $Network
@@ -142,6 +153,9 @@ configuration ITGNetworkManagementWindowsPC
                 )
             }
         }
+
+        #endregion virtual lab networks
+        #region virtual lab VMs
 
         $RouterOSVMs = 'WAN', 'GW1', 'GW2', 'WS1', 'WS2'
         foreach ( $RouterOSVM in $RouterOSVMs )
@@ -441,6 +455,8 @@ configuration ITGNetworkManagementWindowsPC
 				"[xVMSwitch]LAN2"
 				)
         }
+
+        #endregion virtual lab VMs
 
     }
 }
