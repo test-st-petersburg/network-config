@@ -140,6 +140,26 @@ configuration ITGNetworkManagementWindowsPC
         }
 
         #endregion RouterOS image
+        #region management network
+
+        xVMSwitch 'ManagementNetwork'
+        {
+            Name = 'MAN'
+            Type = 'Internal'
+            AllowManagementOS = $True
+            DependsOn = '[WindowsOptionalFeatureSet]HyperV'
+        }
+
+        xVMNetworkAdapter 'ManagementOSNIC'
+        {
+            Id = 'ManagementOSNIC'
+            Name = 'MAN'
+            VMName = 'ManagementOS'
+            SwitchName = 'MAN'
+            DependsOn = "[xVMSwitch]ManagementNetwork"
+        }
+
+        #endregion management network
         #region virtual lab networks
 
         foreach ( $Network in @( 'LAN1', 'LAN2', 'WAN1', 'WAN2' ) )
@@ -189,6 +209,16 @@ configuration ITGNetworkManagementWindowsPC
                 DependsOn = @(
                     '[WindowsOptionalFeatureSet]HyperV',
                     "[xVHD]${RouterOSVM}VHD"
+                )
+            }
+            xVMLegacyNetworkAdapter "${RouterOSVM}MAN" {
+                Id = "${RouterOSVM}MAN"
+                Name = 'MAN'
+                VMName = ${RouterOSVM}
+                SwitchName = 'MAN'
+                DependsOn = @(
+                    "[xVMHyperV]${RouterOSVM}",
+                    "[xVMSwitch]ManagementNetwork"
                 )
             }
             Script "RemoveDefault${RouterOSVM}NIC"
