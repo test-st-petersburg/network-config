@@ -3,6 +3,7 @@
 #Requires -Modules cChoco
 #Requires -Modules xComputerManagement
 #Requires -Modules xHyper-V
+#Requires -Modules xITGHyperV
 #Requires -Modules xPendingReboot
 #Requires -Modules xDownloadFile
 
@@ -19,6 +20,7 @@ configuration ITGNetworkManagementWindowsPC
     Import-DscResource -ModuleName cChoco
     Import-DscResource -ModuleName xComputerManagement
     Import-DscResource -ModuleName xHyper-V
+    Import-DscResource -ModuleName xITGHyperV
     Import-DSCResource -ModuleName xPendingReboot
     Import-DSCResource -ModuleName xDownloadFile
 
@@ -353,6 +355,91 @@ configuration ITGNetworkManagementWindowsPC
                     }
                 }
             }
+        }
+
+        xVMLegacyNetworkAdapter WANWAN1 {
+			Id = 'WANWAN1'
+			Name = 'WAN1'
+			VMName = 'WAN'
+			SwitchName = 'WAN1'
+			DependsOn = @(
+				"[xVMHyperV]WAN",
+				"[xVMSwitch]WAN1"
+				)
+        }
+        xVMLegacyNetworkAdapter WANWAN2 {
+			Id = 'WANWAN2'
+			Name = 'WAN2'
+			VMName = 'WAN'
+			SwitchName = 'WAN2'
+			DependsOn = @(
+				"[xVMHyperV]WAN",
+				"[xVMSwitch]WAN2"
+				)
+        }
+
+		xVMLegacyNetworkAdapter GW1WAN {
+			Id = 'GW1WAN'
+			Name = 'WAN'
+			VMName = 'GW1'
+			SwitchName = 'WAN1'
+			DependsOn = @(
+				"[xVMHyperV]GW1",
+				"[xVMSwitch]WAN1"
+				)
+        }
+        xVMLegacyNetworkAdapter GW1LAN {
+			Id = 'GW1LAN'
+			Name = 'LAN'
+			VMName = 'GW1'
+			SwitchName = 'LAN1'
+			DependsOn = @(
+				"[xVMHyperV]GW1",
+				"[xVMSwitch]LAN1"
+				)
+        }
+
+        xVMLegacyNetworkAdapter WS1LAN {
+			Id = 'WS1LAN'
+			Name = 'LAN'
+			VMName = 'WS1'
+			SwitchName = 'LAN1'
+			DependsOn = @(
+				"[xVMHyperV]WS1",
+				"[xVMSwitch]LAN1"
+				)
+        }
+
+		xVMLegacyNetworkAdapter GW2WAN {
+			Id = 'GW2WAN'
+			Name = 'WAN'
+			VMName = 'GW2'
+			SwitchName = 'WAN2'
+			DependsOn = @(
+				"[xVMHyperV]GW2",
+				"[xVMSwitch]WAN2"
+				)
+        }
+        xVMLegacyNetworkAdapter GW2LAN {
+			Id = 'GW2LAN'
+			Name = 'LAN'
+			VMName = 'GW2'
+			SwitchName = 'LAN2'
+			DependsOn = @(
+				"[xVMHyperV]GW2",
+				"[xVMSwitch]LAN2"
+				)
+        }
+
+        xVMLegacyNetworkAdapter WS2LAN {
+			Id = 'WS2LAN'
+			Name = 'LAN'
+			VMName = 'WS2'
+			SwitchName = 'LAN2'
+			DependsOn = @(
+				"[xVMHyperV]WS2",
+				"[xVMSwitch]LAN2"
+				)
         }
 
     }

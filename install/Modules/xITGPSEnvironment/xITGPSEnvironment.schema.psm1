@@ -53,6 +53,12 @@
             Module_Name = 'xHyper-V'
         }
 
+        PSModuleResource xITGHyperV
+        {
+			Module_Name = 'xITGHyperV'
+			MinimumVersion = '1.0.8'
+        }
+
         PSModuleResource Lability
         {
             Module_Name = 'Lability'
