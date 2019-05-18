@@ -202,9 +202,9 @@ configuration ITGNetworkManagementWindowsPC
                 VhdPath = $RouterOSVhdPath
                 Generation = 1
                 EnableGuestService = $false
-                StartupMemory = 256MB
-                MinimumMemory = 256MB
-                MaximumMemory = 256MB
+                StartupMemory = 128MB
+                MinimumMemory = 128MB
+                MaximumMemory = 128MB
                 ProcessorCount = 1
                 DependsOn = @(
                     '[WindowsOptionalFeatureSet]HyperV',
