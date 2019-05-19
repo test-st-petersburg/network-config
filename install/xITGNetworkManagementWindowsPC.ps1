@@ -11,9 +11,11 @@ configuration ITGNetworkManagementWindowsPC
 {
     param
     (
-        [string[]] $ComputerName = 'localhost',
-        [string] $VirtualLabPath = ( Join-Path -Path $env:SystemDrive -ChildPath 'NetworkVirtualTestLab' ),
-        [string] $MediaPath
+        [System.String[]] $ComputerName = 'localhost',
+        [System.String] $VirtualLabPath = ( Join-Path -Path $env:SystemDrive -ChildPath 'NetworkVirtualTestLab' ),
+        [System.String] $MediaPath,
+        [System.Int64] $RouterOSMemorySize = 128MB
+
     )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
@@ -71,18 +73,18 @@ configuration ITGNetworkManagementWindowsPC
             NoWindowsUpdateCheck = $true
         }
         <#
-		xPendingReboot PendingRebootAfterHyperVInstallation
-		{
-			Name = 'Check for a pending reboot after Hyper-V installation'
-			SkipWindowsUpdate = $true
-			SkipCcmClientSDK = $true
-			DependsOn = @('[WindowsOptionalFeatureSet]HyperV')
-		}
-		LocalConfigurationManager
-		{
-			RebootNodeIfNeeded = $True
-		}
-		#>
+        xPendingReboot PendingRebootAfterHyperVInstallation
+        {
+            Name = 'Check for a pending reboot after Hyper-V installation'
+            SkipWindowsUpdate = $true
+            SkipCcmClientSDK = $true
+            DependsOn = @('[WindowsOptionalFeatureSet]HyperV')
+        }
+        LocalConfigurationManager
+        {
+            RebootNodeIfNeeded = $True
+        }
+        #>
 
         File NetworkVirtualTestLabRoot
         {
@@ -144,10 +146,11 @@ configuration ITGNetworkManagementWindowsPC
         }
 
         $RouterOSVMs = 'WAN', 'GW1', 'GW2', 'WS1', 'WS2'
+        $RouterOSVhdPath = @{}
         foreach ( $RouterOSVM in $RouterOSVMs )
         {
             $RouterOSVhdFileName = $RouterOSVM + [System.IO.Path]::GetExtension( $RouterOSImagePath )
-            $RouterOSVhdPath = Join-Path -Path $VhdPath -ChildPath $RouterOSVhdFileName
+            $RouterOSVhdPath.Add( $RouterOSVM, ( Join-Path -Path $VhdPath -ChildPath $RouterOSVhdFileName ) )
             xVHD "${RouterOSVM}VHD"
             {
                 Name = $RouterOSVhdFileName
@@ -165,40 +168,43 @@ configuration ITGNetworkManagementWindowsPC
             {
                 Name = $RouterOSVM
                 Path = $VMsPath
-                VhdPath = $RouterOSVhdPath
+                VhdPath = $RouterOSVhdPath[$RouterOSVM]
                 Generation = 1
                 EnableGuestService = $false
-                StartupMemory = 128MB
-                MinimumMemory = 128MB
-                MaximumMemory = 128MB
+                StartupMemory = $RouterOSMemorySize
+                MinimumMemory = $RouterOSMemorySize
+                MaximumMemory = $RouterOSMemorySize
                 ProcessorCount = 1
+                RestartIfNeeded = $true
+                State = 'Off'
                 DependsOn = @(
                     '[WindowsOptionalFeatureSet]HyperV',
                     "[xVHD]${RouterOSVM}VHD"
                 )
             }
-			xVMComPort "${RouterOSVM}ComPort" {
-				Id = "${RouterOSVM}COM1"
-				VMName = $RouterOSVM
-				Number = 1
-				Path = "\\.\pipe\itg.network-config.${RouterOSVM}"
-				DependsOn = "[xVMHyperV]${RouterOSVM}"
-			}
-			Script "RemoveDefault${RouterOSVM}NIC"
+            xVMComPort "${RouterOSVM}ComPort"
+            {
+                Id = "${RouterOSVM}COM1"
+                VMName = $RouterOSVM
+                Number = 1
+                Path = "\\.\pipe\itg.network-config.${RouterOSVM}"
+                DependsOn = "[xVMHyperV]${RouterOSVM}"
+            }
+            Script "RemoveDefault${RouterOSVM}NIC"
             {
                 DependsOn = "[xVMHyperV]${RouterOSVM}"
                 GetScript = {
-					<#
-					[CmdletBinding()]
+                    <#
+                    [CmdletBinding()]
                     [OutputType([System.Collections.Hashtable])]
                     param
                     (
                         [parameter(Mandatory)]
                         [System.String]
                         $VMName = $Using:RouterOSVM
-					)
-					#>
-					$VMName = $Using:RouterOSVM
+                    )
+                    #>
+                    $VMName = $Using:RouterOSVM
 
                     $configuration = @{
                         VMName = $VMName
@@ -253,7 +259,7 @@ configuration ITGNetworkManagementWindowsPC
                     return $configuration
                 }
                 TestScript = {
-					<#
+                    <#
                     [CmdletBinding()]
                     [OutputType([System.Collections.Hashtable])]
                     param
@@ -266,9 +272,9 @@ configuration ITGNetworkManagementWindowsPC
                         [ValidateSet('Present', 'Absent')]
                         [String] $Ensure = 'Absent'
                     )
-					#>
-					$VMName = $Using:RouterOSVM
-					$Ensure = 'Absent'
+                    #>
+                    $VMName = $Using:RouterOSVM
+                    $Ensure = 'Absent'
 
                     $arguments = @{}
 
@@ -308,7 +314,7 @@ configuration ITGNetworkManagementWindowsPC
                     }
                 }
                 SetScript = {
-					<#
+                    <#
                     [CmdletBinding()]
                     [OutputType([System.Collections.Hashtable])]
                     param
@@ -321,9 +327,9 @@ configuration ITGNetworkManagementWindowsPC
                         [ValidateSet('Present', 'Absent')]
                         [String] $Ensure = 'Absent'
                     )
-					#>
-					$VMName = $Using:RouterOSVM
-					$Ensure = 'Absent'
+                    #>
+                    $VMName = $Using:RouterOSVM
+                    $Ensure = 'Absent'
 
                     $arguments = @{}
 
@@ -364,89 +370,101 @@ configuration ITGNetworkManagementWindowsPC
             }
         }
 
-        xVMLegacyNetworkAdapter WANWAN1 {
-			Id = 'WANWAN1'
-			Name = 'WAN1'
-			VMName = 'WAN'
-			SwitchName = 'WAN1'
-			DependsOn = @(
-				"[xVMHyperV]WAN",
-				"[xVMSwitch]WAN1"
-				)
+        xVMLegacyNetworkAdapter WANWAN1
+        {
+            Id = 'WANWAN1'
+            Name = 'WAN1'
+            VMName = 'WAN'
+            SwitchName = 'WAN1'
+            DependsOn = @(
+                "[xVMHyperV]WAN",
+                "[xVMSwitch]WAN1"
+            )
         }
-        xVMLegacyNetworkAdapter WANWAN2 {
-			Id = 'WANWAN2'
-			Name = 'WAN2'
-			VMName = 'WAN'
-			SwitchName = 'WAN2'
-			DependsOn = @(
-				"[xVMHyperV]WAN",
-				"[xVMSwitch]WAN2"
-				)
-        }
-
-		xVMLegacyNetworkAdapter GW1WAN {
-			Id = 'GW1WAN'
-			Name = 'WAN'
-			VMName = 'GW1'
-			SwitchName = 'WAN1'
-			DependsOn = @(
-				"[xVMHyperV]GW1",
-				"[xVMSwitch]WAN1"
-				)
-        }
-        xVMLegacyNetworkAdapter GW1LAN {
-			Id = 'GW1LAN'
-			Name = 'LAN'
-			VMName = 'GW1'
-			SwitchName = 'LAN1'
-			DependsOn = @(
-				"[xVMHyperV]GW1",
-				"[xVMSwitch]LAN1"
-				)
+        xVMLegacyNetworkAdapter WANWAN2
+        {
+            Id = 'WANWAN2'
+            Name = 'WAN2'
+            VMName = 'WAN'
+            SwitchName = 'WAN2'
+            DependsOn = @(
+                "[xVMHyperV]WAN",
+                "[xVMSwitch]WAN2"
+            )
         }
 
-        xVMLegacyNetworkAdapter WS1LAN {
-			Id = 'WS1LAN'
-			Name = 'LAN'
-			VMName = 'WS1'
-			SwitchName = 'LAN1'
-			DependsOn = @(
-				"[xVMHyperV]WS1",
-				"[xVMSwitch]LAN1"
-				)
+        xVMLegacyNetworkAdapter GW1WAN
+        {
+            Id = 'GW1WAN'
+            Name = 'WAN'
+            VMName = 'GW1'
+            SwitchName = 'WAN1'
+            DependsOn = @(
+                "[xVMHyperV]GW1",
+                "[xVMSwitch]WAN1"
+            )
+        }
+        xVMLegacyNetworkAdapter GW1LAN
+        {
+            Id = 'GW1LAN'
+            Name = 'LAN'
+            VMName = 'GW1'
+            SwitchName = 'LAN1'
+            DependsOn = @(
+                "[xVMHyperV]GW1",
+                "[xVMSwitch]LAN1"
+            )
         }
 
-		xVMLegacyNetworkAdapter GW2WAN {
-			Id = 'GW2WAN'
-			Name = 'WAN'
-			VMName = 'GW2'
-			SwitchName = 'WAN2'
-			DependsOn = @(
-				"[xVMHyperV]GW2",
-				"[xVMSwitch]WAN2"
-				)
-        }
-        xVMLegacyNetworkAdapter GW2LAN {
-			Id = 'GW2LAN'
-			Name = 'LAN'
-			VMName = 'GW2'
-			SwitchName = 'LAN2'
-			DependsOn = @(
-				"[xVMHyperV]GW2",
-				"[xVMSwitch]LAN2"
-				)
+        xVMLegacyNetworkAdapter WS1LAN
+        {
+            Id = 'WS1LAN'
+            Name = 'LAN'
+            VMName = 'WS1'
+            SwitchName = 'LAN1'
+            DependsOn = @(
+                "[xVMHyperV]WS1",
+                "[xVMSwitch]LAN1"
+            )
         }
 
-        xVMLegacyNetworkAdapter WS2LAN {
-			Id = 'WS2LAN'
-			Name = 'LAN'
-			VMName = 'WS2'
-			SwitchName = 'LAN2'
-			DependsOn = @(
-				"[xVMHyperV]WS2",
-				"[xVMSwitch]LAN2"
-				)
+        xVMLegacyNetworkAdapter GW2WAN
+        {
+            Id = 'GW2WAN'
+            Name = 'WAN'
+            VMName = 'GW2'
+            SwitchName = 'WAN2'
+            DependsOn = @(
+                "[xVMHyperV]GW2",
+                "[xVMSwitch]WAN2"
+            )
+        }
+        xVMLegacyNetworkAdapter GW2LAN
+        {
+            Id = 'GW2LAN'
+            Name = 'LAN'
+            VMName = 'GW2'
+            SwitchName = 'LAN2'
+            DependsOn = @(
+                "[xVMHyperV]GW2",
+                "[xVMSwitch]LAN2"
+            )
+        }
+
+        xVMLegacyNetworkAdapter WS2LAN
+        {
+            Id = 'WS2LAN'
+            Name = 'LAN'
+            VMName = 'WS2'
+            SwitchName = 'LAN2'
+            DependsOn = @(
+                "[xVMHyperV]WS2",
+                "[xVMSwitch]LAN2"
+            )
+        }
+
+        foreach ( $RouterOSVM in $RouterOSVMs )
+        {
         }
 
     }
