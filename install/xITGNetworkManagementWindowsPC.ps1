@@ -3,7 +3,7 @@
 #Requires -Modules cChoco
 #Requires -Modules xComputerManagement
 #Requires -Modules xHyper-V
-#Requires -Modules xITGHyperV
+#Requires -Modules @{ ModuleName = 'xITGHyperV'; ModuleVersion = '1.1.3' }
 #Requires -Modules xPendingReboot
 #Requires -Modules xDownloadFile
 
@@ -20,7 +20,7 @@ configuration ITGNetworkManagementWindowsPC
     Import-DscResource -ModuleName cChoco
     Import-DscResource -ModuleName xComputerManagement
     Import-DscResource -ModuleName xHyper-V
-    Import-DscResource -ModuleName xITGHyperV
+    Import-DscResource -ModuleName xITGHyperV -ModuleVersion '1.1.3.89'
     Import-DSCResource -ModuleName xPendingReboot
     Import-DSCResource -ModuleName xDownloadFile
 
@@ -177,7 +177,14 @@ configuration ITGNetworkManagementWindowsPC
                     "[xVHD]${RouterOSVM}VHD"
                 )
             }
-            Script "RemoveDefault${RouterOSVM}NIC"
+			xVMComPort "${RouterOSVM}ComPort" {
+				Id = "${RouterOSVM}COM1"
+				VMName = $RouterOSVM
+				Number = 1
+				Path = "\\.\pipe\itg.network-config.${RouterOSVM}"
+				DependsOn = "[xVMHyperV]${RouterOSVM}"
+			}
+			Script "RemoveDefault${RouterOSVM}NIC"
             {
                 DependsOn = "[xVMHyperV]${RouterOSVM}"
                 GetScript = {
