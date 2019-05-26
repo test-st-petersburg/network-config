@@ -56,7 +56,7 @@
         PSModuleResource xITGHyperV
         {
 			Module_Name = 'xITGHyperV'
-			MinimumVersion = '1.1.3'
+			MinimumVersion = '1.2.1'
         }
 
         PSModuleResource Lability

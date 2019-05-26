@@ -3,7 +3,7 @@
 #Requires -Modules cChoco
 #Requires -Modules xComputerManagement
 #Requires -Modules xHyper-V
-#Requires -Modules @{ ModuleName = 'xITGHyperV'; ModuleVersion = '1.1.3' }
+#Requires -Modules @{ ModuleName = 'xITGHyperV'; ModuleVersion = '1.2.1' }
 #Requires -Modules xPendingReboot
 #Requires -Modules xDownloadFile
 
@@ -22,7 +22,7 @@ configuration ITGNetworkManagementWindowsPC
     Import-DscResource -ModuleName cChoco
     Import-DscResource -ModuleName xComputerManagement
     Import-DscResource -ModuleName xHyper-V
-    Import-DscResource -ModuleName xITGHyperV -ModuleVersion '1.1.3.89'
+    Import-DscResource -ModuleName xITGHyperV -ModuleVersion '1.2.1.109'
     Import-DSCResource -ModuleName xPendingReboot
     Import-DSCResource -ModuleName xDownloadFile
 
@@ -190,183 +190,14 @@ configuration ITGNetworkManagementWindowsPC
                 Path = "\\.\pipe\itg.network-config.${RouterOSVM}"
                 DependsOn = "[xVMHyperV]${RouterOSVM}"
             }
-            Script "RemoveDefault${RouterOSVM}NIC"
+            xVMNonLegacyNetworkAdapter "RemoveDefault${RouterOSVM}NIC"
             {
+                Id = "RemoveDefault${RouterOSVM}NIC"
+                Name = '*'
+                VMName = $RouterOSVM
+                SwitchName = 'none'
+                Ensure = 'Absent'
                 DependsOn = "[xVMHyperV]${RouterOSVM}"
-                GetScript = {
-                    <#
-                    [CmdletBinding()]
-                    [OutputType([System.Collections.Hashtable])]
-                    param
-                    (
-                        [parameter(Mandatory)]
-                        [System.String]
-                        $VMName = $Using:RouterOSVM
-                    )
-                    #>
-                    $VMName = $Using:RouterOSVM
-
-                    $configuration = @{
-                        VMName = $VMName
-                    }
-                    $arguments = @{}
-
-                    if ($VMName -ne 'ManagementOS')
-                    {
-                        $arguments.Add('VMName', $VMName)
-                    }
-                    else
-                    {
-                        $arguments.Add('ManagementOS', $true)
-                    }
-
-                    Write-Verbose -Message ( 'Check non legacy NIC on virtual machine {0}.' -f $VMName )
-
-                    $netAdapters = @( Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue | Where-Object { -not $_.IsLegacy } )
-
-                    if ( $netAdapters )
-                    {
-                        Write-Verbose -Message ( 'On VM {0} there non legacy NIC exists: {1}.' -f
-                            $VMName,
-                            ( @( $netAdapters | ForEach-Object { $_.Name } ) -join ', ' )
-                        )
-                        $configuration.Add( 'NetworkAdapters', @() )
-                        foreach ( $netAdapter in $netAdapters )
-                        {
-                            $NicConfig = @{
-                                IsLegacy = $false
-                            }
-                            if ($VMName -eq 'ManagementOS')
-                            {
-                                $NicConfig.Add('MacAddress', $netAdapter.MacAddress)
-                                $NicConfig.Add('DynamicMacAddress', $false)
-                            }
-                            elseif ($netAdapter.VMName)
-                            {
-                                $NicConfig.Add('MacAddress', $netAdapter.MacAddress)
-                                $NicConfig.Add('DynamicMacAddress', $netAdapter.DynamicMacAddressEnabled)
-                            }
-                            $configuration.NetworkAdapters.Add( $NicConfig )
-                        }
-                        $configuration.Add( 'Ensure', 'Present' )
-                    }
-                    else
-                    {
-                        Write-Verbose -Message ( 'On VM {0} non legacy NIC does not exists.' -f $VMName )
-                        $configuration.Add( 'Ensure', 'Absent' )
-                    }
-
-                    return $configuration
-                }
-                TestScript = {
-                    <#
-                    [CmdletBinding()]
-                    [OutputType([System.Collections.Hashtable])]
-                    param
-                    (
-                        [parameter(Mandatory)]
-                        [System.String]
-                        $VMName = $Using:RouterOSVM,
-
-                        [Parameter()]
-                        [ValidateSet('Present', 'Absent')]
-                        [String] $Ensure = 'Absent'
-                    )
-                    #>
-                    $VMName = $Using:RouterOSVM
-                    $Ensure = 'Absent'
-
-                    $arguments = @{}
-
-                    if ($VMName -ne 'ManagementOS')
-                    {
-                        $arguments.Add('VMName', $VMName)
-                    }
-                    else
-                    {
-                        $arguments.Add('ManagementOS', $true)
-                    }
-
-                    Write-Verbose -Message ( 'Check non legacy NIC on VM {0}.' -f $VMName )
-
-                    $netAdapters = @( Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue | Where-Object { -not $_.IsLegacy } )
-
-                    if ( $Ensure -eq 'Present' )
-                    {
-                        Write-Verbose -Message ( 'Actions not needed.' )
-                        return $true
-                    }
-                    else
-                    {
-                        if ( $netAdapters )
-                        {
-                            Write-Verbose -Message ( 'On VM {0} there non legacy NICs exists: {1}. Deletion expected.' -f
-                                $VMName,
-                                ( @( $netAdapters | ForEach-Object { $_.Name } ) -join ', ' )
-                            )
-                            return $false
-                        }
-                        else
-                        {
-                            Write-Verbose -Message ( 'On VM {0} non legacy NICs does not exists. Actions not needed.' -f $VMName )
-                            return $true
-                        }
-                    }
-                }
-                SetScript = {
-                    <#
-                    [CmdletBinding()]
-                    [OutputType([System.Collections.Hashtable])]
-                    param
-                    (
-                        [parameter(Mandatory)]
-                        [System.String]
-                        $VMName = $Using:RouterOSVM,
-
-                        [Parameter()]
-                        [ValidateSet('Present', 'Absent')]
-                        [String] $Ensure = 'Absent'
-                    )
-                    #>
-                    $VMName = $Using:RouterOSVM
-                    $Ensure = 'Absent'
-
-                    $arguments = @{}
-
-                    if ($VMName -ne 'ManagementOS')
-                    {
-                        $arguments.Add('VMName', $VMName)
-                    }
-                    else
-                    {
-                        $arguments.Add('ManagementOS', $true)
-                    }
-
-                    Write-Verbose -Message ( 'Check non legacy NIC on VM {0}.' -f $VMName )
-
-                    $netAdapters = @( Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue | Where-Object { -not $_.IsLegacy } )
-
-                    if ( $Ensure -eq 'Present' )
-                    {
-                        Write-Verbose -Message ( 'Actions not needed.' )
-                    }
-                    else
-                    {
-                        if ( $netAdapters )
-                        {
-                            Write-Verbose -Message ( 'On VM {0} there non legacy NICs exists: {1}. Deletion expected.' -f
-                                $VMName,
-                                ( @( $netAdapters | ForEach-Object { $_.Name } ) -join ', ' )
-                            )
-                            $netAdapters | Remove-VMNetworkAdapter -Verbose -ErrorAction Stop
-                            Write-Verbose -Message ( 'On VM {0} non legacy NICs are deleted successfully.' -f $VMName )
-                        }
-                        else
-                        {
-                            Write-Verbose -Message ( 'On VM {0} non legacy NICs does not exists. Actions not needed.' -f $VMName )
-                        }
-                    }
-                }
             }
         }
 
