@@ -1,0 +1,28 @@
+{
+    "version": "0.1",
+    "ignorePaths": [
+        ".git/*",
+        ".vscode/*",
+        "node_modules"
+    ],
+    "language": "en,ru",
+    "dictionaries": [
+        "powershell"
+    ],
+    "words": [
+        "уязвимостях",
+        "репозитории",
+        "betke",
+        "markdownlint",
+        "codecov",
+        "Recurse",
+        "PreRelease",
+        "Veyor"
+    ],
+    "ignoreRegExpList": [
+        "AppVeyor",
+        "opencode@microsoft.com",
+        "\\.gitattributes",
+        "\\[.*?\\]\\(.*?\\)"
+    ]
+}
