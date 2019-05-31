@@ -28,6 +28,36 @@
             Module_Name = 'xPowerShellExecutionPolicy'
         }
 
+        PSModuleResource InvokeBuild
+        {
+            Module_Name = 'InvokeBuild'
+        }
+
+        PSModuleResource Plaster
+        {
+            Module_Name = 'Plaster'
+        }
+
+        PSModuleResource PSScriptAnalyzer
+        {
+            Module_Name = 'PSScriptAnalyzer'
+        }
+
+        PSModuleResource Pester
+        {
+            Module_Name = 'Pester'
+        }
+
+        PSModuleResource platyPS
+        {
+            Module_Name = 'platyPS'
+        }
+
+        PSModuleResource New-VSCodeTask
+        {
+            Module_Name = 'New-VSCodeTask'
+		}
+
         PSModuleResource cChoco
         {
             Module_Name = 'cChoco'
