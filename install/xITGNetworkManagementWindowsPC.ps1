@@ -3,7 +3,7 @@
 #Requires -Modules cChoco
 #Requires -Modules xComputerManagement
 #Requires -Modules xHyper-V
-#Requires -Modules @{ ModuleName = 'xITGHyperV'; ModuleVersion = '1.2.1' }
+#Requires -Modules @{ ModuleName = 'xITGHyperV'; ModuleVersion = '1.2.6' }
 #Requires -Modules xPendingReboot
 #Requires -Modules xDownloadFile
 
@@ -22,7 +22,7 @@ configuration ITGNetworkManagementWindowsPC
     Import-DscResource -ModuleName cChoco
     Import-DscResource -ModuleName xComputerManagement
     Import-DscResource -ModuleName xHyper-V
-    Import-DscResource -ModuleName xITGHyperV -ModuleVersion '1.2.1.109'
+    Import-DscResource -ModuleName xITGHyperV
     Import-DSCResource -ModuleName xPendingReboot
     Import-DSCResource -ModuleName xDownloadFile
 
