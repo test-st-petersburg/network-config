@@ -2,6 +2,7 @@
 $VerbosePreference = [System.Management.Automation.ActionPreference]::Continue;
 
 [string] $script:Buffer = '';
+[string] $script:VerboseBuffer = '';
 
 Function Wait-Expect
 {
@@ -33,14 +34,24 @@ Function Wait-Expect
         while ( $StreamData -eq -1 ) {
             Start-Sleep -Milliseconds 50;
             $StreamData = $StreamReader.Read();
-        };
+		};
+		switch ( [char]$StreamData ) {
+			"`r" {
+				Write-Verbose $script:VerboseBuffer;
+				$script:VerboseBuffer = "";
+			}
+			"`n" {}
+			Default {
+				$script:VerboseBuffer += [char] $StreamData;
+			}
+		}
 		$script:Buffer += [char] $StreamData;
-
         $SearchResults = ( $script:Buffer | Select-String $Pattern ).Matches;
     } while ( -not $SearchResults.Success );
 
-    $script:Buffer = $script:Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
-    Write-Verbose $SearchResults.Value;
+	Write-Verbose $script:VerboseBuffer;
+	$script:VerboseBuffer = "";
+	$script:Buffer = $script:Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
 
 }
 
