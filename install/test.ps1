@@ -1,8 +1,8 @@
 ﻿$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
-$VerbosePreference = [System.Management.Automation.ActionPreference]::Continue;
+$VerbosePreference = [System.Management.Automation.ActionPreference]::SilentlyContinue;
 
-[string] $script:Buffer = '';
-[string] $script:VerboseBuffer = '';
+[string] $Script:Buffer = '';
+[string] $Script:VerboseBuffer = '';
 
 Function Wait-Expect
 {
@@ -21,81 +21,135 @@ Function Wait-Expect
 #>
     [CmdletBinding()]
     param(
-        [parameter( Mandatory = $true )]
-        [System.IO.TextReader] $StreamReader,
-        [parameter( Mandatory = $true )]
-        [string] $Pattern
+        [Parameter( Mandatory = $true )]
+        [System.IO.TextReader] $ConsoleStreamReader,
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string] $PromptPattern = '\[.+?\] >',
+        [Switch] $PassThru
     )
 
-    $local:ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
+    $Local:ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
+
+    $Script:Buffer = '';
+    $Script:VerboseBuffer = '';
+
+    $RegExp = New-Object System.Text.RegularExpressions.Regex( $PromptPattern );
 
     do
     {
-        $StreamData = $StreamReader.Read();
+        $StreamData = $ConsoleStreamReader.Read();
         while ( $StreamData -eq -1 )
         {
             Start-Sleep -Milliseconds 50;
-            $StreamData = $StreamReader.Read();
+            $StreamData = $ConsoleStreamReader.Read();
         };
         switch ( [char]$StreamData )
         {
             "`r"
             {
-                Write-Verbose $script:VerboseBuffer;
-                $script:VerboseBuffer = "";
+                Write-Verbose $Script:VerboseBuffer;
+                $Script:VerboseBuffer = "";
             }
             "`n"
             {
             }
             Default
             {
-                $script:VerboseBuffer += [char] $StreamData;
+                $Script:VerboseBuffer += [char] $StreamData;
             }
         }
-        $script:Buffer += [char] $StreamData;
-        $SearchResults = ( $script:Buffer | Select-String $Pattern ).Matches;
+        $Script:Buffer += [char] $StreamData;
+        $SearchResults = $RegExp.Match( $Script:Buffer );
     } while ( -not $SearchResults.Success );
 
-    Write-Verbose $script:VerboseBuffer;
-    $script:VerboseBuffer = "";
-    $script:Buffer = $script:Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
+    Write-Verbose $Script:VerboseBuffer;
+    $Script:VerboseBuffer = "";
 
+    $Result = $Script:Buffer.Substring( 0, $SearchResults.Index );
+    $Script:Buffer = $Script:Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
+    if ( $PassThru )
+    {
+        return $Result;
+    };
+}
+
+Function Invoke-RemoteCommand
+{
+    [CmdletBinding()]
+    param(
+        [Parameter( Mandatory = $true )]
+        [System.IO.TextReader] $ConsoleStreamReader,
+        [Parameter( Mandatory = $true )]
+        [System.IO.TextWriter] $ConsoleStreamWriter,
+        [Parameter( Mandatory = $true, ValueFromPipeLine = $true )]
+        [AllowEmptyString()]
+        [string] $Command,
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string] $PromptPattern = '\[.+?\] >',
+        [Switch] $PassThru
+    )
+
+    $Local:ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
+
+    $Script:Buffer = '';
+    $Script:VerboseBuffer = '';
+
+    $ConsoleStreamWriter.WriteLine( $Command );
+    Write-Verbose ">>>> $Command";
+
+    $EscapedCommand = [System.Text.RegularExpressions.Regex]::Escape( $Command );
+    Wait-Expect `
+        -ConsoleStreamReader $ConsoleStreamReader `
+        -PromptPattern "$PromptPattern\s*$EscapedCommand" `
+        -Verbose:$false;
+    Wait-Expect `
+        -ConsoleStreamReader $ConsoleStreamReader `
+        -PromptPattern "$PromptPattern\s*$EscapedCommand" `
+        -Verbose:$false;
+
+    return Wait-Expect `
+        -ConsoleStreamReader $ConsoleStreamReader `
+        -PromptPattern $PromptPattern `
+        -PassThru:$PassThru `
+        -Verbose:$Verbose;
 }
 
 $RouterOSVM = 'GW1';
 Stop-VM -Name $RouterOSVM -Verbose;
 Start-VM -Name $RouterOSVM -Verbose;
 
-$npipe = New-Object System.IO.Pipes.NamedPipeClientStream(
+$ConsoleStream = New-Object System.IO.Pipes.NamedPipeClientStream(
     'localhost',
     "itg.network-config.$RouterOSVM",
     [System.IO.Pipes.PipeDirection]::InOut,
     [System.IO.Pipes.PipeOptions]::None,
     [System.Security.Principal.TokenImpersonationLevel]::Impersonation
 );
-$npipe.Connect();
+$ConsoleStream.Connect();
+$ConsoleStreamReader = New-Object System.IO.StreamReader( $ConsoleStream );
+$ConsoleStreamWriter = New-Object System.IO.StreamWriter( $ConsoleStream );
+$ConsoleStreamWriter.AutoFlush = $true;
 
-$pipeReader = New-Object System.IO.StreamReader( $npipe );
-$pipeWriter = New-Object System.IO.StreamWriter( $npipe );
-$pipeWriter.AutoFlush = $true;
+Wait-Expect -PromptPattern 'Login:' `
+    -ConsoleStreamReader $ConsoleStreamReader -Verbose;
+$ConsoleStreamWriter.WriteLine( 'admin' );
+Wait-Expect -PromptPattern 'Password:' `
+    -ConsoleStreamReader $ConsoleStreamReader -Verbose;
+$ConsoleStreamWriter.WriteLine( '' );
+Wait-Expect `
+    -ConsoleStreamReader $ConsoleStreamReader -Verbose;
 
-Wait-Expect -StreamReader $pipeReader -Pattern 'Login:' -Verbose;
-$pipeWriter.WriteLine( 'admin' );
-Wait-Expect -StreamReader $pipeReader -Pattern 'Password:' -Verbose;
-$pipeWriter.WriteLine( '' );
+Invoke-RemoteCommand -Command '/system identity print' `
+    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter -Verbose -PassThru `
+| Write-Host;
+Invoke-RemoteCommand -Command "/system identity set name=${RouterOSVM}" `
+    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter -Verbose -PassThru `
+| Write-Host;
+Invoke-RemoteCommand -Command '/system identity print' `
+    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter -Verbose -PassThru `
+| Write-Host;
 
-Wait-Expect -StreamReader $pipeReader -Pattern '] >' -Verbose;
-$pipeWriter.WriteLine( "/system identity print" );
-$pipeReader.ReadLine() | Write-Host;
-
-Wait-Expect -StreamReader $pipeReader -Pattern '] >' -Verbose;
-$pipeWriter.WriteLine( "/system identity set name=${RouterOSVM}" );
-
-Wait-Expect -StreamReader $pipeReader -Pattern '] >' -Verbose;
-$pipeWriter.WriteLine( "/system identity print" );
-$pipeReader.ReadLine() | Write-Host;
-$pipeReader.ReadLine() | Write-Host;
-$pipeReader.ReadLine() | Write-Host;
-
-$npipe.Dispose();
+$ConsoleStream.Dispose();
 Stop-VM -Name $RouterOSVM -Verbose;
