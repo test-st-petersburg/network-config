@@ -1,24 +1,8 @@
 ﻿$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 $VerbosePreference = [System.Management.Automation.ActionPreference]::SilentlyContinue;
 
-[string] $Script:Buffer = '';
-[string] $Script:VerboseBuffer = '';
-
 Function Wait-Expect
 {
-    <#
-.SYNOPSIS
-    Keep receiving output from a background job until it matches a pattern.
-    The output will be appended to the log file as it's received.
-    When a match is found, the line with it will be returned as the result.
-
-    The wait may be limited by a timeout. If the match is not received within
-    the timeout, throws an error (unless the option -Quiet is used, then
-    just returns).
-
-    If the job completes without matching the pattern, the reaction is the same
-    as on the timeout.
-#>
     [CmdletBinding()]
     param(
         [Parameter( Mandatory = $true )]
@@ -26,48 +10,62 @@ Function Wait-Expect
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [string] $PromptPattern = '\[.+?\] >',
-        [Switch] $PassThru
+        [Switch] $PassThru,
+        [Parameter()]
+        [System.TimeSpan] $Timeout = ( New-Object System.TimeSpan( 0, 0, 30 ) )
     )
 
     $Local:ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 
-    $Script:Buffer = '';
-    $Script:VerboseBuffer = '';
+    $Buffer = '';
+    $VerboseBuffer = '';
+
+    $Timer = [Diagnostics.StopWatch]::StartNew();
 
     $RegExp = New-Object System.Text.RegularExpressions.Regex( $PromptPattern );
 
     do
     {
         $StreamData = $ConsoleStreamReader.Read();
-        while ( $StreamData -eq -1 )
+        while ( ( $StreamData -eq -1 ) -and ( $Timer.Elapsed -lt $Timeout ) )
         {
             Start-Sleep -Milliseconds 50;
             $StreamData = $ConsoleStreamReader.Read();
+        };
+        if ( $Timer.Elapsed -ge $Timeout )
+        {
+            Write-Error -Exception ( New-Object System.TimeoutException );
         };
         switch ( [char]$StreamData )
         {
             "`r"
             {
-                Write-Verbose $Script:VerboseBuffer;
-                $Script:VerboseBuffer = "";
+                if ( $VerboseBuffer )
+                {
+                    Write-Verbose $VerboseBuffer;
+                    $VerboseBuffer = "";
+                };
             }
             "`n"
             {
             }
             Default
             {
-                $Script:VerboseBuffer += [char] $StreamData;
+                $VerboseBuffer += [char] $StreamData;
             }
         }
-        $Script:Buffer += [char] $StreamData;
-        $SearchResults = $RegExp.Match( $Script:Buffer );
+        $Buffer += [char] $StreamData;
+        $SearchResults = $RegExp.Match( $Buffer );
     } while ( -not $SearchResults.Success );
 
-    Write-Verbose $Script:VerboseBuffer;
-    $Script:VerboseBuffer = "";
+    if ( $VerboseBuffer )
+    {
+        Write-Verbose $VerboseBuffer;
+        $VerboseBuffer = "";
+    };
 
-    $Result = $Script:Buffer.Substring( 0, $SearchResults.Index );
-    $Script:Buffer = $Script:Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
+    $Result = $Buffer.Substring( 0, $SearchResults.Index );
+    $Buffer = $Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
     if ( $PassThru )
     {
         return $Result;
@@ -92,9 +90,6 @@ Function Invoke-RemoteCommand
     )
 
     $Local:ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
-
-    $Script:Buffer = '';
-    $Script:VerboseBuffer = '';
 
     $ConsoleStreamWriter.WriteLine( $Command );
     Write-Verbose ">>>> $Command";
