@@ -1,7 +1,7 @@
 ﻿$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 $VerbosePreference = [System.Management.Automation.ActionPreference]::Continue;
 
-[string] $Buffer = '';
+[string] $script:Buffer = '';
 
 Function Wait-Expect
 {
@@ -26,24 +26,22 @@ Function Wait-Expect
 		[string] $Pattern
 	)
 
-	$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
+	$local:ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 
-    while ( $true ) {
-
-		$SearchResults = ( $Buffer | Select-String $Pattern ).Matches;
-		if ( $SearchResults.Success ) {
-			$Buffer = $Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
-			Write-Verbose $SearchResults.Value;
-			return;
-		};
-
+    do {
 		$StreamData = $StreamReader.Read();
-		$Buffer += [char] $StreamData;
-		if ( $StreamData -ne -1 ) {
-			# Write-Verbose $Buffer;
-		};
+        while ( $StreamData -eq -1 ) {
+            Start-Sleep -Milliseconds 50;
+            $StreamData = $StreamReader.Read();
+        };
+		$script:Buffer += [char] $StreamData;
 
-	};
+        $SearchResults = ( $script:Buffer | Select-String $Pattern ).Matches;
+    } while ( -not $SearchResults.Success );
+
+    $script:Buffer = $script:Buffer.Remove( 0, $SearchResults.Index + $SearchResults.Length );
+    Write-Verbose $SearchResults.Value;
+
 }
 
 $RouterOSVM = 'GW1';
