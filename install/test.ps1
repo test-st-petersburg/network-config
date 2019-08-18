@@ -20,22 +20,31 @@ $ConsoleStreamWriter = New-Object System.IO.StreamWriter( $ConsoleStream );
 $ConsoleStreamWriter.AutoFlush = $true;
 
 Wait-ITGSerialTerminalExpectedMessage -PromptPattern 'Login:' `
-    -ConsoleStreamReader $ConsoleStreamReader -Verbose;
+    -ConsoleStreamReader $ConsoleStreamReader `
+    -Timeout ( New-Object System.TimeSpan( 0, 0, 30 ) ) -Verbose;
 $ConsoleStreamWriter.WriteLine( 'admin' );
 Wait-ITGSerialTerminalExpectedMessage -PromptPattern 'Password:' `
-    -ConsoleStreamReader $ConsoleStreamReader -Verbose;
+    -ConsoleStreamReader $ConsoleStreamReader `
+    -Timeout ( New-Object System.TimeSpan( 0, 0, 5 ) ) -Verbose;
 $ConsoleStreamWriter.WriteLine( '' );
 Wait-ITGSerialTerminalExpectedMessage `
-    -ConsoleStreamReader $ConsoleStreamReader -Verbose;
+    -ConsoleStreamReader $ConsoleStreamReader `
+    -Timeout ( New-Object System.TimeSpan( 0, 0, 30 ) ) -Verbose;
 
 Invoke-ITGSerialTerminalRemoteCommand -Command '/system identity print' `
-    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter -Verbose -PassThru `
+    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter `
+    -Timeout ( New-Object System.TimeSpan( 0, 0, 5 ) ) -Verbose `
+    -PassThru `
 | Write-Host;
 Invoke-ITGSerialTerminalRemoteCommand -Command "/system identity set name=${RouterOSVM}" `
-    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter -Verbose -PassThru `
+    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter  `
+    -Timeout ( New-Object System.TimeSpan( 0, 0, 5 ) ) -Verbose `
+    -PassThru `
 | Write-Host;
 Invoke-ITGSerialTerminalRemoteCommand -Command '/system identity print' `
-    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter -Verbose -PassThru `
+    -ConsoleStreamReader $ConsoleStreamReader -ConsoleStreamWriter $ConsoleStreamWriter `
+    -Timeout ( New-Object System.TimeSpan( 0, 0, 5 ) ) -Verbose `
+    -PassThru `
 | Write-Host;
 
 $ConsoleStream.Dispose();
