@@ -56,7 +56,7 @@
         PSModuleResource xITGHyperV
         {
 			Module_Name = 'xITGHyperV'
-			MinimumVersion = '1.2.1'
+			MinimumVersion = '1.2.6'
         }
 
         PSModuleResource Lability
@@ -72,6 +72,11 @@
         PSModuleResource xDownloadFile
         {
             Module_Name = 'xDownloadFile'
+        }
+
+        PSModuleResource ITGSerialTerminalTools
+        {
+            Module_Name = 'ITGSerialTerminalTools'
         }
 
     }
